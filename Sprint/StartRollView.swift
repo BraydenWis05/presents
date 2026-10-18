@@ -27,6 +27,7 @@ struct StartRollView: View {
     @State private var merging = false
     @State private var sealedLink: URL?
     @FocusState private var nameFocused: Bool
+    @FocusState private var groupFocused: Bool
 
     static let colors: [UInt32] = [0xBCD3DC, 0xE2642E, 0xD257B4, 0x1A86A6, 0xE5D24A]
 
@@ -159,6 +160,10 @@ struct StartRollView: View {
                             .overlay(alignment: .bottom) { Rectangle().fill(.white.opacity(0.18)).frame(height: 1) }
                         help("This is how you show up in your groups.")
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    // The whole area focuses the field, not just the text glyphs.
+                    .contentShape(Rectangle())
+                    .onTapGesture { nameFocused = true }
                     .onAppear { Task { try? await Task.sleep(for: .seconds(0.35)); nameFocused = true } }
                 } else {
                     VStack(alignment: .leading, spacing: 22) {
@@ -309,8 +314,12 @@ struct StartRollView: View {
                             .font(.display(26))
                             .foregroundStyle(.white)
                             .multilineTextAlignment(.center)
+                            .focused($groupFocused)
                             .padding(.vertical, 8)
+                            .frame(maxWidth: .infinity)
                             .overlay(alignment: .bottom) { Rectangle().fill(.white.opacity(0.18)).frame(height: 1) }
+                            .contentShape(Rectangle())
+                            .onTapGesture { groupFocused = true }
                             .onChange(of: groupName) { _, new in gather?.type(new) }
                         wideButton("Next") { withAnimation(.easeInOut(duration: 0.4)) { askingDate = true } }
                     }
@@ -445,12 +454,16 @@ struct StartRollView: View {
     }
 
     private func inviteManually() {
+        gather?.stop()
+        step = .share
+    }
+
+    /// Link path: the group starts once they've picked when it opens.
+    private func makeLink() {
         let id = UUID()
         let name = groupName.trimmingCharacters(in: .whitespaces).isEmpty ? "\(store.state.me)'s group" : groupName.trimmingCharacters(in: .whitespaces)
         store.startRoll(id: id, name: name, members: [store.state.me], revealDate: revealDate)
-        gather?.stop()
-        sealedLink = store.inviteLink
-        step = .share
+        withAnimation(.easeInOut(duration: 0.4)) { sealedLink = store.inviteLink }
     }
 
     // MARK: Share (invite with a link)
@@ -458,8 +471,20 @@ struct StartRollView: View {
     private var shareView: some View {
         VStack(spacing: 20) {
             Spacer()
-            question("send it to your people")
-            help("Anyone with the link can join.")
+            if sealedLink == nil {
+                question("when do you open it?")
+                help("Everything stays sealed until then.")
+                revealChips
+                DatePicker("Opens", selection: $revealDate, in: Date.now..., displayedComponents: .date)
+                    .font(.system(size: 14))
+                    .foregroundStyle(Color(hex: 0x8B9C9F))
+                    .padding(.horizontal, 24)
+                wideButton("Make the invite link") { makeLink() }
+                    .padding(.horizontal, 24)
+            } else {
+                question("send it to your people")
+                help("Anyone with the link can join.")
+            }
             if let sealedLink {
                 ShareLink(item: sealedLink, message: Text("Join our group on Presents. Everything stays sealed until we open it together.")) {
                     Text("Share invite link")
@@ -479,6 +504,20 @@ struct StartRollView: View {
     }
 
     // MARK: Pieces
+
+    private var revealChips: some View {
+        HStack(spacing: 8) {
+            ForEach([(1, "1 month"), (2, "2 months"), (4, "End of semester")], id: \.0) { months, label in
+                let date = Calendar.current.date(byAdding: .month, value: months, to: .now) ?? .now
+                let on = Calendar.current.isDate(date, inSameDayAs: revealDate)
+                Button(label) { revealDate = date }
+                    .font(.system(size: 13, weight: .medium))
+                    .padding(.horizontal, 12).padding(.vertical, 8)
+                    .background(Capsule().fill(on ? Color.white : Color.white.opacity(0.08)))
+                    .foregroundStyle(on ? Color(hex: 0x0B1316) : .white)
+            }
+        }
+    }
 
     private func question(_ text: String) -> some View {
         Text(text).font(.displayItalic(36)).foregroundStyle(Color(hex: 0xF3F5F2))

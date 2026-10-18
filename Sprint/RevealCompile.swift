@@ -14,6 +14,8 @@ nonisolated struct RevealItem: Codable, Hashable, Identifiable, Sendable {
     var durationMs: Int?
     /// Who added it, shown on reveal night.
     var by: String = ""
+    /// What they wrote under it, if anything.
+    var caption: String?
 }
 
 nonisolated struct RevealCluster: Sendable {
@@ -197,7 +199,8 @@ nonisolated enum RevealCompiler {
         return roll.moments.map { m in
             let member = ids[m.author] ?? { let id = "m\(ids.count + 1)"; ids[m.author] = id; return id }()
             return RevealItem(id: m.id, member: member, kind: m.kind, at: m.createdAt,
-                              text: (m.kind == .word || m.kind == .note) ? m.text : nil, durationMs: nil, by: m.author)
+                              text: (m.kind == .word || m.kind == .note) ? m.text : nil, durationMs: nil, by: m.author,
+                              caption: m.caption.isEmpty ? nil : m.caption)
         }
     }
 }

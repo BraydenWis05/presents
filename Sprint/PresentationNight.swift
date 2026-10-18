@@ -531,15 +531,24 @@ private struct CollageScene: View {
                             RevealFrame(item: item, sharp: sharp && !paused, hidden: hidden.contains(item.id), sound: sound)
                                 .frame(width: cellW, height: cellH)
                                 .overlay(alignment: .bottomLeading) {
-                                    HStack(spacing: 6) {
-                                        Avatar(name: item.by, size: 20)
-                                        Text("\(item.by) · \(RevealCompiler.time(item.at))")
-                                            .font(.system(size: 11, weight: .medium))
-                                            .foregroundStyle(.white)
+                                    VStack(alignment: .leading, spacing: 6) {
+                                        if let caption = item.caption, !hidden.contains(item.id) {
+                                            Text(caption)
+                                                .font(.displayItalic(18))
+                                                .foregroundStyle(.white)
+                                                .shadow(color: .black.opacity(0.7), radius: 8)
+                                                .opacity(sharp && !paused ? 1 : 0)
+                                        }
+                                        HStack(spacing: 6) {
+                                            Avatar(name: item.by, size: 20)
+                                            Text("\(item.by) · \(RevealCompiler.time(item.at))")
+                                                .font(.system(size: 11, weight: .medium))
+                                                .foregroundStyle(.white)
+                                        }
+                                        .padding(.horizontal, 6).padding(.vertical, 4)
+                                        .background(Capsule().fill(.black.opacity(0.45)))
                                     }
-                                    .padding(.horizontal, 6).padding(.vertical, 4)
-                                    .background(Capsule().fill(.black.opacity(0.45)))
-                                    .padding(6)
+                                    .padding(8)
                                 }
                         }
                     }
