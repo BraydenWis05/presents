@@ -163,7 +163,8 @@ footer b { font-family: var(--serif); font-style: italic; font-weight: 400; font
 
 @media (prefers-reduced-motion: reduce) { * { transition-duration: .01ms !important; animation: none !important; } }
 /* ---------- one screen ---------- */
-html, body { height: 100%; overflow: hidden; }
+html, body { height: auto; overflow-x: clip; }
+html { scroll-behavior: smooth; }
 .stage { height: 100dvh; box-sizing: border-box; display: grid; grid-template-columns: minmax(0,1fr) auto; grid-template-rows: auto minmax(0,1fr); gap: 16px 40px; padding: 18px max(16px, 3vw) 18px; }
 .top { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
 .brand { display: inline-flex; gap: 10px; align-items: center; font-family: var(--serif); font-size: 26px; }
@@ -491,6 +492,69 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
 .vcard { aspect-ratio: 5/3; background: var(--voice); border-radius: 2cqh; display: grid; place-items: center; }
 .vcard .bars { height: 40%; }
 .vcard .kcap { color: rgba(255,255,255,.85); }
+
+/* ================= website shell ================= */
+.nav { position: fixed; top: 16px; left: 50%; translate: -50% -12px; z-index: 80; display: flex; gap: 2px; padding: 5px; border-radius: 999px; background: rgba(14,24,28,.62); backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2); border: 1px solid rgba(255,255,255,.09); opacity: 0; pointer-events: none; transition: opacity .8s ease, translate .8s ease; }
+body.ready .nav { opacity: 1; translate: -50% 0; pointer-events: auto; }
+.nav a { font-family: var(--serif); font-size: 17px; color: var(--muted); text-decoration: none; padding: 7px 16px; border-radius: 999px; transition: color .25s, background .25s; white-space: nowrap; }
+.nav a:hover { color: var(--ink); }
+.nav a.on { color: var(--ink); background: rgba(255,255,255,.08); }
+.nav a:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+@media (max-width: 420px) { .nav a { font-size: 15px; padding: 7px 11px; } }
+
+/* scroll story: one orb, three stops */
+.scrolly { position: relative; height: 420vh; }
+.scrolly .anchor { position: absolute; left: 0; width: 1px; height: 1px; }
+.pin { position: sticky; top: 0; height: 100vh; height: 100dvh; overflow: hidden; }
+.orb { --s: min(46vmin, 380px); position: absolute; left: 50%; top: 50%; width: var(--s); height: var(--s); margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2); will-change: transform; display: grid; place-items: center; }
+.orb .orb-glow { position: absolute; inset: -12%; animation: orbspin 26s linear infinite; }
+.orb .orb-glow i { position: absolute; inset: 14%; border-radius: 50%; background: radial-gradient(circle, var(--c) 0%, color-mix(in srgb, var(--c) 50%, transparent) 30%, transparent 68%); opacity: .78; translate: var(--x) var(--y); animation: orbdrift 9s ease-in-out infinite alternate; animation-delay: var(--d); }
+@keyframes orbspin { to { rotate: 360deg; } }
+@keyframes orbdrift { from { translate: var(--x) var(--y); } to { translate: calc(var(--x) * -.6) calc(var(--y) * -.6); } }
+.orb .core { position: relative; display: grid; justify-items: center; gap: 10px; text-shadow: 0 0 30px rgba(6,12,14,.85), 0 0 8px rgba(6,12,14,.6); }
+.orb .core .mark { position: relative; inset: auto; margin: 0; width: calc(var(--s) * .16); height: calc(var(--s) * .16); }
+.orb .core .mark b { box-shadow: 0 0 14px rgba(255,255,255,.5); }
+.orb .core b.word { font-family: var(--serif); font-weight: 400; font-size: calc(var(--s) * .2); line-height: 1; letter-spacing: -.01em; }
+.cue { position: absolute; left: 50%; bottom: 28px; translate: -50% 0; display: grid; justify-items: center; gap: 8px; font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); transition: opacity .4s; }
+.cue i { width: 1px; height: 34px; background: linear-gradient(var(--muted), transparent); animation: cue 1.8s ease-in-out infinite; transform-origin: top; }
+@keyframes cue { 0% { scale: 1 0; } 50% { scale: 1 1; } 100% { scale: 1 1; opacity: 0; } }
+
+.panel { position: absolute; opacity: 0; will-change: transform, opacity; }
+.panel.p-what { right: max(24px, 7vw); top: 50%; width: min(440px, 40vw); translate: 0 -50%; padding: 34px 34px 38px; border-radius: 28px; background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.025)); border: 1px solid rgba(255,255,255,.08); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.panel small, .closing small, .contact small { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.panel.p-what p { margin: 14px 0 0; font-family: var(--serif); font-size: clamp(24px, 2.4vw, 32px); line-height: 1.22; text-wrap: balance; }
+.panel.p-what p em { color: var(--muted); }
+.panel.p-story { left: 50%; top: calc(50% + min(23vmin, 190px) * .94 + 36px); width: min(620px, calc(100vw - 48px)); translate: -50% 0; text-align: center; }
+.panel.p-story p { margin: 12px 0 0; color: var(--ink); font-size: clamp(16px, 1.5vw, 19px); line-height: 1.6; text-wrap: balance; }
+.panel.p-story p + p { color: var(--muted); }
+.panel.p-story p strong { font-family: var(--serif); font-weight: 400; font-style: italic; font-size: 1.35em; color: var(--ink); }
+@media (max-width: 760px) {
+  .panel.p-what { left: 24px; right: 24px; width: auto; top: auto; bottom: 9vh; translate: none; padding: 24px; }
+  .panel.p-story { top: calc(50% + min(23vmin, 190px) + 12px); }
+}
+
+.closing { padding: 18vh 24px 4vh; text-align: center; display: grid; justify-items: center; gap: 10px; }
+.closing h2 { margin: 0; font-family: var(--serif); font-style: italic; font-weight: 400; font-size: clamp(44px, 7vw, 88px); line-height: 1; }
+.closing p { margin: 0; color: var(--muted); font-size: 16px; max-width: 44ch; line-height: 1.5; }
+#demo { position: relative; scroll-margin-top: 0; }
+#demo .stage { padding-top: 76px; }
+#demo .stage .top { display: none; }
+.demo-frame { position: absolute; inset: 0 max(12px, 2vw); border-radius: 36px; border: 1px solid var(--line); background: radial-gradient(ellipse at 50% 40%, rgba(188,211,220,.06), transparent 60%); pointer-events: none; }
+
+.contact { padding: 16vh 24px 12vh; display: grid; justify-items: center; gap: 14px; text-align: center; }
+.contact h2 { margin: 0; font-family: var(--serif); font-weight: 400; font-size: clamp(38px, 5vw, 64px); line-height: 1.02; }
+.contact > p { margin: 0; color: var(--muted); max-width: 44ch; line-height: 1.5; }
+.crew { display: flex; flex-wrap: wrap; justify-content: center; gap: 28px; margin-top: 26px; }
+.crew a { color: inherit; text-decoration: none; display: grid; justify-items: center; gap: 10px; }
+.crew .ph { width: 104px; height: 104px; border-radius: 50%; background: #2a3236 center/cover; filter: grayscale(1); transition: filter .4s, scale .4s; }
+.crew a:hover .ph { filter: none; scale: 1.04; }
+.crew b { font-family: var(--serif); font-weight: 400; font-size: 21px; }
+.crew span { font-size: 12px; color: var(--muted); }
+.made { margin-top: 30px; display: inline-flex; gap: 8px; align-items: center; padding: 11px 20px; border-radius: 999px; border: 1px solid rgba(255,255,255,.12); color: var(--ink); text-decoration: none; font-size: 14px; transition: background .2s; }
+.made:hover { background: rgba(255,255,255,.06); }
+.foot { padding: 24px; text-align: center; font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); }
+.foot .mark { position: relative; inset: auto; display: inline-block; width: 14px; height: 14px; margin: 0 6px -2px 0; }
+@media (prefers-reduced-motion: reduce) { .orb .orb-glow, .orb .orb-glow i, .cue i { animation: none; } html { scroll-behavior: auto; } }
 </style>
 
 <div class="grain"></div>
@@ -545,6 +609,50 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
     </div>
   </div>
 </div>
+<nav class="nav" id="nav" aria-label="Sections">
+  <a href="#top" data-sec="top">presents</a>
+  <a href="#our-story" data-sec="our-story">our story</a>
+  <a href="#demo" data-sec="demo">demo</a>
+  <a href="#contact" data-sec="contact">contact</a>
+</nav>
+
+<section class="scrolly" id="scrolly">
+  <span class="anchor" id="top" style="top:0"></span>
+  <span class="anchor" id="what" style="top:calc(320vh * .38)"></span>
+  <span class="anchor" id="our-story" style="top:calc(320vh * .86)"></span>
+  <div class="pin">
+    <div class="orb" id="orb" aria-hidden="true">
+      <div class="orb-glow">
+        <i style="--c:var(--video);--x:0%;--y:-14%;--d:0s"></i>
+        <i style="--c:var(--photo);--x:14%;--y:-4%;--d:-2s"></i>
+        <i style="--c:var(--word);--x:-14%;--y:-4%;--d:-4s"></i>
+        <i style="--c:var(--voice);--x:9%;--y:12%;--d:-6s"></i>
+        <i style="--c:var(--doodle);--x:-9%;--y:12%;--d:-8s"></i>
+      </div>
+      <div class="core"><span class="mark" id="orbMark"></span><b class="word">Presents</b></div>
+    </div>
+    <h1 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Presents: capture a moment, together</h1>
+    <div class="panel p-what" id="pWhat">
+      <small>what it is</small>
+      <p>Presents is for the times we don't capture. <em>The small moments we forget,</em> kept sealed until we celebrate them together.</p>
+    </div>
+    <div class="panel p-story" id="pStory">
+      <small>our story</small>
+      <p>We're seniors in college, and our time together is almost up.</p>
+      <p>We want to remember more than the big nights. We want the little moments in between. We call them <strong>presents</strong>.</p>
+    </div>
+    <div class="cue" id="cue"><span>scroll</span><i></i></div>
+  </div>
+</section>
+
+<section class="closing">
+  <small>the demo</small>
+  <h2>try it out yourself!</h2>
+  <p>Make a group, seal a few moments, then open them together on the TV.</p>
+</section>
+
+<section id="demo">
+<div class="demo-frame"></div>
 <main class="stage solo" id="stage">
   <div class="top">
     <span class="brand"><span class="mark" id="heroMark"></span>Presents</span>
@@ -660,6 +768,20 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
 </div>
 
 </main>
+</section>
+
+<section class="contact" id="contact">
+  <small>contact</small>
+  <h2>say hi.</h2>
+  <p>We're three designers who wanted a better way to hold onto senior year. Reach out to any of us.</p>
+  <div class="crew">
+    <a href="https://www.linkedin.com/in/braydenwisniewski/" target="_blank" rel="noopener"><div class="ph" style="background-image:url(team1.png)"></div><b>Brayden</b><span>LinkedIn ↗</span></a>
+    <a href="https://www.linkedin.com/in/chris-demassa/" target="_blank" rel="noopener"><div class="ph" style="background-image:url(team2.png)"></div><b>Chris</b><span>LinkedIn ↗</span></a>
+    <a href="https://www.linkedin.com/in/finley-peplinski/" target="_blank" rel="noopener"><div class="ph" style="background-image:url(team3.png)"></div><b>Finley</b><span>LinkedIn ↗</span></a>
+  </div>
+  <a class="made" href="https://svsdschool.github.io/competition/" target="_blank" rel="noopener">Designed for the SVSD Design Sprint ↗</a>
+</section>
+<footer class="foot"><span class="mark" id="footMark"></span>Presents · capture a moment, together</footer>
 
 <script>
 (() => {
@@ -696,8 +818,8 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
     const spots = [[50, 17], [83, 41], [70, 79], [30, 79], [17, 41]];
     el.innerHTML = spots.map(([x, y]) => `<b style="left:${x}%;top:${y}%;background:${color}"></b>`).join('');
   }
-  markHTML($('#heroMark')); markHTML($('#introMark')); markHTML($('#welcomeMark')); markHTML($('#bentoMark')); markHTML($('#replayMark')); $$('#introMark b').forEach((b, i) => b.style.animationDelay = (1.15 + i * .07) + 's');
-  const intro = $('#intro'), endIntro = () => { intro.classList.add('done'); setTimeout(() => { intro.style.display = 'none'; $('#nameIn').focus(); }, 950); };
+  markHTML($('#heroMark')); markHTML($('#orbMark')); markHTML($('#footMark')); markHTML($('#introMark')); markHTML($('#welcomeMark')); markHTML($('#bentoMark')); markHTML($('#replayMark')); $$('#introMark b').forEach((b, i) => b.style.animationDelay = (1.15 + i * .07) + 's');
+  const intro = $('#intro'), endIntro = () => { intro.classList.add('done'); document.body.classList.add('ready'); setTimeout(() => { intro.style.display = 'none'; }, 950); };
   const beats = $$('#story > *'); let beat = -1, beatTimer = null;
   function nextBeat() {
     clearTimeout(beatTimer);
@@ -1221,7 +1343,7 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
     beats.forEach((b, k) => setTimeout(() => { beats.forEach((x) => x.classList.remove('on')); b.classList.add('on'); }, 900 + k * 3600));
   }
   $('#replay').addEventListener('click', () => { location.hash = 'again'; location.reload(); });
-  if (location.hash === '#again') { history.replaceState(null, '', location.pathname + location.search); endIntro(); }
+  if (location.hash === '#again') { history.replaceState(null, '', location.pathname + location.search); endIntro(); requestAnimationFrame(() => $('#demo').scrollIntoView({ behavior: 'instant' })); }
   const NOTE_TO = ''; // where notes go
   $('#note').addEventListener('submit', (ev) => {
     ev.preventDefault();
@@ -1263,5 +1385,58 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
   $('#tvSample').addEventListener('click', () => { R = sample(); renderTV(); $('#tvSample').hidden = true; $('#revealIntro').textContent = 'A sample reveal night, "Senior spring". Click the TV or press → to keep going.'; if (S.view === 'companion') { renderHome(); show('home'); } });
 
   addEventListener('resize', measure);
+})();
+</script>
+
+<script>
+// Scroll story: orb center → left (with "what it is") → center (with "our story")
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const wrap = $('#scrolly'), orb = $('#orb'), what = $('#pWhat'), story = $('#pStory'), cue = $('#cue');
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const ease = (t) => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  const seg = (p, a, b) => ease(clamp((p - a) / (b - a)));
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function frame() {
+    const r = wrap.getBoundingClientRect(), range = wrap.offsetHeight - innerHeight;
+    const p = clamp(-r.top / range), narrow = innerWidth <= 760;
+    const toLeft = seg(p, .12, .36), back = seg(p, .58, .8);
+    const leftX = narrow ? 0 : -(innerWidth * .5 - Math.max(24, innerWidth * .07)) + orb.offsetWidth * .5 + 10;
+    const leftY = narrow ? -innerHeight * .2 : 0;
+    const x = leftX * (toLeft - back), y = leftY * (toLeft - back) - (narrow ? 0 : innerHeight * .1) * back;
+    const s = 1 - .16 * (toLeft - back) - .06 * back;
+    orb.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
+    const wIn = seg(p, .26, .4), wOut = seg(p, .56, .66);
+    what.style.opacity = wIn - wOut;
+    what.style.transform = `translateX(${(1 - wIn) * 60 - wOut * 30}px)`;
+    what.style.pointerEvents = wIn - wOut > .5 ? 'auto' : 'none';
+    const sIn = seg(p, .74, .88);
+    story.style.opacity = sIn;
+    story.style.transform = `translateY(${(1 - sIn) * 24 - (narrow ? 0 : innerHeight * .1) * back}px)`;
+    cue.style.opacity = 1 - clamp(p / .06);
+  }
+  let raf = 0; const tick = () => { raf = 0; frame(); };
+  addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(tick); }, { passive: true });
+  addEventListener('resize', frame); frame();
+
+  // nav: highlight the section in view; leaving the ending overlay when jumping around
+  const links = [...document.querySelectorAll('.nav a')];
+  const at = (id) => { links.forEach((a) => a.classList.toggle('on', a.dataset.sec === id)); };
+  function spy() {
+    const y = innerHeight * .5, demo = $('#demo').getBoundingClientRect(), contact = $('#contact').getBoundingClientRect();
+    const range = wrap.offsetHeight - innerHeight, p = clamp(-wrap.getBoundingClientRect().top / range);
+    if (contact.top < y) at('contact'); else if (demo.top < y) at('demo'); else if (p > .7) at('our-story'); else at('top');
+  }
+  addEventListener('scroll', spy, { passive: true }); spy();
+  links.forEach((a) => a.addEventListener('click', () => {
+    const e = $('#ending'); if (e.classList.contains('on')) { e.classList.remove('on'); document.body.classList.remove('ended'); }
+  }));
+
+  // focus the first field once the demo is actually on screen
+  let focused = false;
+  new IntersectionObserver((es) => es.forEach((e) => {
+    if (e.isIntersecting && !focused && document.body.classList.contains('ready')) { focused = true; $('#nameIn').focus({ preventScroll: true }); }
+  }), { threshold: .6 }).observe($('#stage'));
+  if (reduce) document.documentElement.style.scrollBehavior = 'auto';
 })();
 </script>
