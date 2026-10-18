@@ -478,6 +478,25 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
 .noterow input { flex: 1; min-width: 0; padding: 12px 16px; border-radius: 99px; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); color: #fff; font: inherit; font-size: 15px; outline: none; }
 .notebox textarea:focus, .noterow input:focus { border-color: rgba(255,255,255,.5); }
 .notebox .note { text-align: left; margin: 0; min-height: 1.2em; }
+/* keepsake table */
+.table { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 55%, rgba(188,211,220,.10), transparent 70%); }
+.tlabel { position: absolute; left: 4%; top: 7%; font-family: var(--serif); font-style: italic; font-size: 5cqh; opacity: 0; transition: opacity .8s; }
+.table.in .tlabel { opacity: .85; }
+.keep { position: absolute; translate: -50% -50%; rotate: calc(var(--r) * 2.2); scale: 1.25; opacity: 0; filter: blur(8px); transition: rotate .9s cubic-bezier(.2,.9,.25,1.15), scale .9s cubic-bezier(.2,.9,.25,1.15), opacity .5s, filter .7s; }
+.table.in .keep { rotate: var(--r); scale: 1; opacity: 1; filter: blur(0); }
+.kp { position: relative; box-shadow: 0 2cqh 5cqh -1cqh rgba(0,0,0,.7); }
+.print { background: #F4F2EC; padding: 1.4cqh 1.4cqh 5.6cqh; border-radius: .4cqh; }
+.print .img { position: relative; aspect-ratio: 4/3; overflow: hidden; }
+.print.paper .img { aspect-ratio: 1; }
+.print .kcap { color: #3a3a36; }
+.kcap { position: absolute; left: 1.6cqh; bottom: 1.6cqh; font-family: var(--serif); font-style: italic; font-size: 2.6cqh; white-space: nowrap; }
+.sticky { aspect-ratio: 1; background: var(--word); padding: 12% 10%; display: grid; place-items: center; border-radius: .3cqh; overflow: hidden; }
+.sticky p { position: relative; margin: 0; font-family: var(--serif); font-size: 4.6cqh; line-height: 1.12; color: var(--pill-ink); text-align: center; text-wrap: balance; }
+.sticky .kcap { color: rgba(11,19,22,.65); }
+.sgrain2 { position: absolute; inset: 0; background-image: var(--grain); background-size: 256px; mix-blend-mode: soft-light; opacity: .9; }
+.vcard { aspect-ratio: 5/3; background: var(--voice); border-radius: 2cqh; display: grid; place-items: center; }
+.vcard .bars { height: 40%; }
+.vcard .kcap { color: rgba(255,255,255,.85); }
 </style>
 
 <div class="grain"></div>
@@ -1097,9 +1116,27 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
       sc.innerHTML = s.items.slice(0, 9).map((m, i) => { const [x, y, w, h] = SPOTS[i]; return `<div class="tframe" style="left:${x}%;top:${y}%;width:${w}%;height:${h}%">${mediaHTML(m, false)}</div>`; }).join('')
         + `<div class="title-c"><b>${dayPart(s.start)}</b><div class="faces">${[...new Set(s.items.map((m) => m.by))].map((n) => av(n)).join('')}</div></div>`;
     } else if (st.type === 'open') {
-      const items = R.sections[st.si].items, n = items.length, cols = n <= 1 ? 1 : n <= 4 ? 2 : 3;
-      sc.innerHTML = `<div class="collage" style="grid-template-columns:repeat(${cols},1fr)">${items.map((m, k) => `<div class="cell" style="transition-delay:${k * .25}s">${mediaHTML(m, n <= 2)}<span class="clabel">${stamp(m.at)} · ${m.by}</span></div>`).join('')}</div>`;
-      setTimeout(() => sc.querySelector('.collage')?.classList.add('sharp'), 250);
+      // a table of keepsakes: photos as prints, words as stickies, dropped in one at a time
+      const items = R.sections[st.si].items.slice(0, 6), n = items.length;
+      const LAY = {
+        1: [[50, 52, 46, -2]],
+        2: [[33, 50, 40, -5], [68, 52, 34, 4]],
+        3: [[30, 46, 40, -4], [68, 34, 28, 5], [64, 72, 30, -3]],
+        4: [[27, 44, 36, -5], [62, 30, 26, 4], [72, 68, 26, -3], [44, 74, 24, 6]],
+        5: [[26, 42, 34, -4], [58, 28, 24, 5], [80, 46, 20, -6], [50, 72, 24, 3], [22, 78, 20, -2]],
+        6: [[24, 40, 30, -4], [52, 26, 22, 5], [78, 34, 20, -6], [74, 72, 22, 4], [46, 70, 22, -3], [18, 76, 18, 3]],
+      }[n];
+      const card = (m, k) => {
+        const [x, y, w, r] = LAY[k], kind = m.kind;
+        const cap = `<span class="kcap">${stamp(m.at)} · ${m.by}</span>`;
+        let inner;
+        if (kind === 'word') inner = `<div class="kp sticky"><div class="sgrain2"></div><p>${m.text || ''}</p>${cap}</div>`;
+        else if (kind === 'voice') inner = `<div class="kp vcard"><div class="bars">${Array.from({ length: 16 }, (_, i) => `<i style="animation-delay:${(i * 37 % 100) / 100}s"></i>`).join('')}</div>${cap}</div>`;
+        else inner = `<div class="kp print ${kind === 'doodle' ? 'paper' : ''}"><div class="img">${mediaHTML(m, true)}</div>${cap}</div>`;
+        return `<div class="keep" style="left:${x}%;top:${y}%;width:${w}%;--r:${r}deg;transition-delay:${.2 + k * .35}s">${inner}</div>`;
+      };
+      sc.innerHTML = `<div class="table"><div class="tlabel">${dayPart(R.sections[st.si].start)}</div>${items.map(card).join('')}</div>`;
+      setTimeout(() => sc.querySelector('.table')?.classList.add('in'), 60);
       const v = items.find((m) => m.kind === 'voice' && m.src); if (v) { const a = new Audio(v.src); a.play().catch(() => {}); }
     } else if (st.type === 'moment') {
       const m = R.sections[st.si].items[st.ii];
