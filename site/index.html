@@ -831,7 +831,8 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
     if (!fin) { const d = new Date(); d.setDate(d.getDate() - ((d.getDay() + 1) % 7)); d.setHours(SCENES[i].h, SCENES[i].m, 0, 0); S.clock = d.getTime(); }
     const when = fin ? 'A few weeks later' : `${new Date(S.clock).toLocaleDateString('en-US', { weekday: 'long' })} · ${new Date(S.clock).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
     card.innerHTML = `<small>${when}</small><b>${fin ? "Reveal night." : SCENES[i].line}</b><span>${fin ? "Everyone's in one room. Nobody has seen a thing, not even what they added." : (SCENES[i].sub || '')}</span>`;
-    card.style.backgroundImage = !fin && SCENES[i].img ? `linear-gradient(180deg, rgba(8,14,16,.35), rgba(8,14,16,.82)), url(${SCENES[i].img})` : '';
+    const bg = fin ? 'reveal.png' : SCENES[i].img;
+    card.style.backgroundImage = bg ? `linear-gradient(180deg, rgba(8,14,16,.35), rgba(8,14,16,.82)), url(${bg})` : '';
     card.innerHTML += `<em>tap to continue</em>`;
     const prev = S.view; S.view = 'scene'; card.classList.add('on');
     const done = () => {
@@ -841,7 +842,7 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
       if (fin) { addWeeks(); renderHome(); $('#openNow').textContent = 'Put it on the TV'; $('#openNow').disabled = false; $('#openNow').classList.add('ready'); }
       else { openShuffle(); setTimeout(() => { if (S.view === 'shuffle' && mode === 'idle') startSpin(); }, 900); step(3); }
     };
-    card.onclick = done; card._t = setTimeout(done, !fin && SCENES[i].img ? 7000 : 4200); tick(700);
+    card.onclick = done; card._t = setTimeout(done, bg ? 7000 : 4200); tick(700);
   }
 
   // reveal only covers the day you just lived through: top up each moment with friends' adds
