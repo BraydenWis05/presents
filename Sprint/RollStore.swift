@@ -21,6 +21,9 @@ final class RollStore {
     /// Transient: drives the capture sheet from anywhere in the app.
     var captureRequest: CaptureRequest?
 
+    /// Transient: the moment just sealed on this phone, so the roll can show it dropping in.
+    var justSealed: Moment?
+
     /// Transient: roll members physically nearby right now (from PresenceMonitor).
     var togetherNow: [String] = [] {
         didSet { if togetherNow != oldValue { refreshWidget() } }
@@ -143,6 +146,7 @@ final class RollStore {
             }
         }
         updateActive { $0.moments.append(moment) }
+        justSealed = moment
         if let rollID = activeRoll?.id { upload(moment, rollID: rollID) }
     }
 
