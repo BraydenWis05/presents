@@ -342,18 +342,18 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = B79JBM8RV4;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = B79JBM8RV4;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Config/Presents-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Presents;
-				INFOPLIST_KEY_NSCameraUsageDescription = "Presents uses the camera to save a moment to your roll.";
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Presents finds your friends' phones nearby so you can start a roll together and notice when you're all in the same place.";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Presents records short voice memos for your roll.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "So you can add photos and videos to your chapter.";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "So you can start a chapter in person and open it together on one screen.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "So you can add voice notes to your chapter.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -386,18 +386,18 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = B79JBM8RV4;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = B79JBM8RV4;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Config/Presents-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Presents;
-				INFOPLIST_KEY_NSCameraUsageDescription = "Presents uses the camera to save a moment to your roll.";
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Presents finds your friends' phones nearby so you can start a roll together and notice when you're all in the same place.";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Presents records short voice memos for your roll.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "So you can add photos and videos to your chapter.";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "So you can start a chapter in person and open it together on one screen.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "So you can add voice notes to your chapter.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -430,9 +430,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
-				DEVELOPMENT_TEAM = B79JBM8RV4;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = B79JBM8RV4;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Config/PresentsWidget-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Presents;
@@ -457,9 +457,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
-				DEVELOPMENT_TEAM = B79JBM8RV4;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = B79JBM8RV4;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Config/PresentsWidget-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Presents;

@@ -133,7 +133,7 @@ struct MomentCard: View {
                 RollOrb(fill: isPlayingVoice ? 1 : 0.6)
                     .frame(width: 170, height: 170)
                     .overlay(Image(systemName: "waveform").font(.system(size: 36, weight: .medium)).foregroundStyle(.white))
-                TagLabel(isPlayingVoice ? "Playing voice memo" : "Voice memo")
+                TagLabel(isPlayingVoice ? "Playing voice note" : "Voice note")
             }
             .padding(.vertical, 8)
         case .word:

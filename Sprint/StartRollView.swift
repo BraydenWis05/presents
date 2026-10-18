@@ -111,10 +111,6 @@ struct StartRollView: View {
                 .font(.displayItalic(44))
                 .multilineTextAlignment(.center)
                 .foregroundStyle(Color(hex: 0xF3F5F2))
-            Text("A small group, one moment at a time.")
-                .font(.system(size: 15))
-                .foregroundStyle(Color(hex: 0x8B9C9F))
-                .padding(.top, 10)
             Spacer()
             wideButton("Get started") { click(); step = store.state.me.isEmpty ? .name : .group }
                 .padding(.horizontal, 24)
@@ -135,7 +131,7 @@ struct StartRollView: View {
                         .frame(width: 40, height: 40)
                 }
                 HStack(spacing: 6) {
-                    ForEach(0..<2, id: \.self) { i in
+                    ForEach(0..<1, id: \.self) { i in
                         Capsule().fill(.white.opacity(i <= step.rawValue - 1 ? 0.9 : 0.18)).frame(height: 3)
                     }
                 }
@@ -158,7 +154,6 @@ struct StartRollView: View {
                             .onSubmit(nextFromName)
                             .padding(.vertical, 10)
                             .overlay(alignment: .bottom) { Rectangle().fill(.white.opacity(0.18)).frame(height: 1) }
-                        help("This is how you show up in your groups.")
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     // The whole area focuses the field, not just the text glyphs.
@@ -234,7 +229,8 @@ struct StartRollView: View {
         guard !myName.trimmingCharacters(in: .whitespaces).isEmpty else { return }
         click()
         nameFocused = false
-        step = .photo
+        // No face step: names and faces stay out of it until the reveal.
+        finishProfile()
     }
 
     private func finishProfile() {
@@ -279,7 +275,7 @@ struct StartRollView: View {
 
             VStack(spacing: 8) {
                 question("make your group").frame(maxWidth: .infinity)
-                help("Hold your phone against a friend's phone to add them.").multilineTextAlignment(.center)
+                help("Hold your phones close.").multilineTextAlignment(.center)
             }
             .padding(.top, 24)
             .padding(.horizontal, 40)
@@ -347,7 +343,7 @@ struct StartRollView: View {
                                 DatePicker("Opens", selection: $revealDate, in: Date.now..., displayedComponents: .date)
                                     .font(.system(size: 14))
                                     .foregroundStyle(Color(hex: 0x8B9C9F))
-                                wideButton("Start group") { launch() }
+                                wideButton("Start the chapter") { launch() }
                             }
                             .transition(.opacity)
                         }
@@ -362,7 +358,7 @@ struct StartRollView: View {
                 }
             }
 
-            Button("Invite with a link instead") { inviteManually() }
+            Button("Invite with a link") { inviteManually() }
                 .font(.system(size: 14))
                 .foregroundStyle(.white.opacity(0.75))
                 .padding(.vertical, 14)
@@ -372,7 +368,7 @@ struct StartRollView: View {
     }
 
     private var placeholderName: String {
-        guard let first = arrived.first else { return "Name your group" }
+        guard let first = arrived.first else { return "Name this chapter" }
         return "\(first) & \(myName.trimmingCharacters(in: .whitespaces).isEmpty ? "you" : myName.trimmingCharacters(in: .whitespaces))"
     }
 
@@ -461,7 +457,7 @@ struct StartRollView: View {
     /// Link path: the group starts once they've picked when it opens.
     private func makeLink() {
         let id = UUID()
-        let name = groupName.trimmingCharacters(in: .whitespaces).isEmpty ? "\(store.state.me)'s group" : groupName.trimmingCharacters(in: .whitespaces)
+        let name = groupName.trimmingCharacters(in: .whitespaces).isEmpty ? "\(store.state.me)'s chapter" : groupName.trimmingCharacters(in: .whitespaces)
         store.startRoll(id: id, name: name, members: [store.state.me], revealDate: revealDate)
         withAnimation(.easeInOut(duration: 0.4)) { sealedLink = store.inviteLink }
     }
@@ -479,15 +475,15 @@ struct StartRollView: View {
                     .font(.system(size: 14))
                     .foregroundStyle(Color(hex: 0x8B9C9F))
                     .padding(.horizontal, 24)
-                wideButton("Make the invite link") { makeLink() }
+                wideButton("Make the link") { makeLink() }
                     .padding(.horizontal, 24)
             } else {
                 question("send it to your people")
                 help("Anyone with the link can join.")
             }
             if let sealedLink {
-                ShareLink(item: sealedLink, message: Text("Join our group on Presents. Everything stays sealed until we open it together.")) {
-                    Text("Share invite link")
+                ShareLink(item: sealedLink, message: Text("Join \"\(store.activeRoll?.name ?? "our chapter")\" on Presents. It stays sealed until we open it together.")) {
+                    Text("Share the link")
                         .font(.system(size: 17, weight: .medium))
                         .foregroundStyle(Color(hex: 0x0B1316))
                         .frame(maxWidth: .infinity)

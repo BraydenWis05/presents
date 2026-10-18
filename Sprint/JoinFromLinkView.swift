@@ -17,7 +17,7 @@ struct JoinFromLinkView: View {
             VStack(alignment: .leading, spacing: 22) {
                 TagLabel("You're invited")
                 Text(invite.name).font(.display(46)).foregroundStyle(Palette.ink)
-                Text("With \(Together.names(invite.members)). Everything stays sealed until you open it together on \(invite.revealDate.stamp).")
+                Text("With \(Together.names(invite.members)). Opens \(invite.revealDate.stamp).")
                     .font(.copy(16))
                     .foregroundStyle(Palette.secondary)
 
@@ -30,12 +30,12 @@ struct JoinFromLinkView: View {
                 }
 
                 if let current = store.activeRoll {
-                    Text("You're already in \(current.name). Open that one first, then join this.")
+                    Text("You're already in \(current.name). Open that one first.")
                         .font(.copy(15)).foregroundStyle(Palette.secondary)
                 } else if isFull {
-                    Text("This roll is full.").font(.copy(15)).foregroundStyle(Palette.secondary)
+                    Text("This one's full.").font(.copy(15)).foregroundStyle(Palette.secondary)
                 } else {
-                    Button("Join the roll") { join() }
+                    Button("Join") { join() }
                         .buttonStyle(.pill)
                         .disabled(!canJoin)
                         .opacity(canJoin ? 1 : 0.4)

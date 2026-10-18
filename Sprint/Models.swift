@@ -14,7 +14,7 @@ nonisolated enum MomentKind: String, Codable, CaseIterable, Identifiable, Sendab
         case .video: "Video"
         case .voice: "Voice note"
         case .doodle: "Doodle"
-        case .word: "Typed words"
+        case .word: "Words"
         case .note: "Note"
         }
     }
@@ -45,7 +45,7 @@ nonisolated enum MomentKind: String, Codable, CaseIterable, Identifiable, Sendab
     /// The button that starts capturing once it's picked.
     var action: String {
         switch self {
-        case .photo: "Take photo"
+        case .photo: "Snap"
         case .video: "Film"
         case .voice: "Record"
         case .doodle: "Draw"

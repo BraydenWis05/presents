@@ -24,7 +24,7 @@ final class RollStore {
     /// Transient: the moment just sealed on this phone, so the roll can show it dropping in.
     var justSealed: Moment?
 
-    /// Transient: roll members physically nearby right now (from PresenceMonitor).
+    /// Transient: no longer filled (nearby detection was cut); kept so the widget snapshot still builds.
     var togetherNow: [String] = [] {
         didSet { if togetherNow != oldValue { refreshWidget() } }
     }
@@ -317,7 +317,7 @@ final class RollStore {
             revealDate: roll.revealDate,
             momentCount: roll.moments.count,
             isReadyToOpen: roll.isReadyToOpen,
-            togetherWith: togetherNow
+            togetherWith: []
         ).save()
 
         let newestFirst = Array(roll.moments.sorted { $0.createdAt > $1.createdAt }.prefix(5))

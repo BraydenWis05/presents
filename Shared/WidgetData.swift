@@ -48,9 +48,9 @@ nonisolated enum DeepLink {
 }
 
 nonisolated extension Date {
-    /// "Oct 16 • 2026"
+    /// "Oct 16 · 2026"
     var stamp: String {
-        "\(formatted(.dateTime.month(.abbreviated).day())) • \(formatted(.dateTime.year()))"
+        "\(formatted(.dateTime.month(.abbreviated).day())) · \(formatted(.dateTime.year()))"
     }
 }
 

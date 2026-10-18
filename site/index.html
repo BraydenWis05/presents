@@ -527,9 +527,9 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
         <div class="htext"><small>Presents</small><h3>capture a moment, together</h3><p>A private time capsule for a small group of friends. Add the little things as they happen. Open them all together.</p>
         <button class="pill" id="replay"><span class="mark" id="replayMark" hidden></span>Go through it again</button></div>
       </section>
-      <section class="c shuffle"><div class="art"><div class="orbit"><i style="--c:var(--video);--a:0deg"></i><i style="--c:var(--photo);--a:72deg"></i><i style="--c:var(--word);--a:144deg"></i><i style="--c:var(--voice);--a:216deg"></i><i style="--c:var(--doodle);--a:288deg"></i></div></div><h4>The app picks</h4><p>Shuffle for a photo, video, voice note, doodle or a few words. One take.</p></section>
+      <section class="c shuffle"><div class="art"><div class="orbit"><i style="--c:var(--video);--a:0deg"></i><i style="--c:var(--photo);--a:72deg"></i><i style="--c:var(--word);--a:144deg"></i><i style="--c:var(--voice);--a:216deg"></i><i style="--c:var(--doodle);--a:288deg"></i></div></div><h4>Shuffle</h4><p>Shuffle picks a photo, video, voice note, doodle or words. One take.</p></section>
       <section class="c sealed"><div class="art"><div class="pile"><i style="--c:var(--photo);--r:-8deg;--x:-18px"></i><i style="--c:var(--word);--r:6deg;--x:16px"></i><i style="--c:var(--voice);--r:-2deg;--x:0px"></i></div></div><h4>Sealed, even from you</h4><p>Once it's in, nobody sees it. Not even you.</p></section>
-      <section class="c reveal"><div class="art"><div class="tvset"><div class="scr"><span style="background:var(--photo)"></span><span style="background:var(--word)"></span><span style="background:var(--voice)"></span><span style="background:var(--doodle)"></span></div><div class="phones3"><i></i><i class="me"></i><i></i></div></div></div><h4>Reveal night</h4><p>Put it on the TV. It opens section by section, and everything from one moment shows up together.</p></section>
+      <section class="c reveal"><div class="art"><div class="tvset"><div class="scr"><span style="background:var(--photo)"></span><span style="background:var(--word)"></span><span style="background:var(--voice)"></span><span style="background:var(--doodle)"></span></div><div class="phones3"><i></i><i class="me"></i><i></i></div></div></div><h4>Reveal night</h4><p>Put it on the TV. It opens moment by moment, and everything from one moment shows up together.</p></section>
       <section class="c person"><div class="art"><div class="touch"><i></i><b></b><i></i></div></div><h4>Start in person</h4><p>Hold your phones close to make the group. No accounts.</p></section>
       <section class="c hide"><div class="art"><div class="hid"><span></span><svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/><path d="M3 3l18 18"/></svg></div></div><h4>Hide anything</h4><p>Anyone can quietly hide a moment. Nobody sees who.</p></section>
       <a class="c svsd" href="https://svsdschool.github.io/competition/" target="_blank" rel="noopener"><span class="arrow">↗</span><small>designed for</small><h4>SVSD Design Sprint</h4><p>A national student design &amp; prototyping competition.</p></a>
@@ -560,7 +560,6 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
           <div class="spacer"></div>
           <p class="q">what do friends call you?</p>
           <input class="field" id="nameIn" maxlength="20" placeholder="Your first name" autocomplete="off">
-          <p class="help">This is how you show up in your group.</p>
           <div class="spacer"></div>
           <button class="pill wide" id="nameGo" disabled>Continue</button>
         </div>
@@ -587,14 +586,14 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
 
         <div class="view" data-v="home">
           <p class="home-title" id="homeTitle">Chapter</p>
-          <p class="help" id="homeSub">3 of us</p>
+          <p class="help" id="homeSub" hidden></p>
           <p class="scene-lbl" id="sceneLbl"></p>
           <div class="friends" id="friends"></div>
           <div class="stack" id="stack"></div>
-          <p class="help" id="sealedCount">0 moments sealed</p>
+          <p class="help" id="sealedCount" hidden></p>
           <button class="pill" id="openNow" disabled style="padding:10px 20px;font-size:14px">Open it together</button>
-          <div class="tabs"><span class="on">Our Roll</span><span>Chapters</span></div>
-          <button class="capbtn" id="capBtn" aria-label="Add to the roll"><span class="mark" id="capMark"></span></button>
+          <div class="tabs"><span class="on">Now</span><span>Chapters</span></div>
+          <button class="capbtn" id="capBtn" aria-label="Add a moment"><span class="mark" id="capMark"></span></button>
         </div>
 
         <div class="view" data-v="shuffle" style="padding:0">
@@ -635,7 +634,7 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
 
         <div class="floaters" id="floaters"></div>
         <div class="toast" id="toast"></div>
-        <div class="saved off" id="saved"><b>It's in the roll.</b><span class="muted" style="font-size:13px">You'll see it on reveal night, with everyone</span></div>
+        <div class="saved off" id="saved"><b>It's in.</b></div>
         <div class="sgrain"></div>
       </div>
     </div>
@@ -685,7 +684,7 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
     video: { title: 'Video', color: '#E2642E', ask: 'Film a few seconds of it.', lines: ["Show us what's in front of you", 'Ten seconds, no edits', 'Pan slowly across the room'], icon: '<rect x="2.5" y="6.5" width="13" height="11" rx="2"/><path d="M15.5 10.5 21.5 7v10l-6-3.5"/>' },
     voice: { title: 'Voice note', color: '#1A86A6', ask: 'Say it out loud.', lines: ['Say the thing out loud', 'Hum the song stuck in your head', 'Tell someone about your morning'], icon: '<path d="M3 10.4v3.2M6.6 7v10M10.2 4v16M13.8 8.7v6.6M17.4 6.2v11.6M21 10.4v3.2"/>' },
     doodle: { title: 'Doodle', color: '#BCD3DC', ask: 'Draw it. Badly is fine.', lines: ['Draw it badly, on purpose', 'Sketch the view from where you are', 'Doodle what you had for lunch'], icon: '<path d="M4 20l1.2-4.2L16.6 4.4a2 2 0 0 1 2.9 0l.1.1a2 2 0 0 1 0 2.9L8.2 18.8 4 20Z"/><path d="m14.5 6.5 3 3"/>' },
-    word: { title: 'Typed words', color: '#E5D24A', ask: 'Say it in a few words.', lines: ["Write the one line you'd forget", 'Something you overheard today', "What you'd tell yourself a year ago"], icon: '<path d="M4 7h16M4 12h16M10 17h10"/>' },
+    word: { title: 'Words', color: '#E5D24A', ask: 'Say it in a few words.', lines: ["Write the one line you'd forget", 'Something you overheard today', "What you'd tell yourself a year ago"], icon: '<path d="M4 7h16M4 12h16M10 17h10"/>' },
   };
   const ORDER = ['video', 'photo', 'word', 'voice', 'doodle'];
   const PEOPLE = { Maya: '#D257B4', Jordan: '#E2642E' };
@@ -734,7 +733,7 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
     $$('.view', screen).forEach((el) => el.classList.toggle('on', el.dataset.v === v));
     blobsVisible(v === 'shuffle');
   }
-  const HINTS = ['Type your name to start.', "Maya and Jordan are here. Drag their phones close to yours to connect.", 'Tap the white dots and shuffle.', 'Add what you got. Do it a couple of times. Friends add things too.', 'Put it on the TV. Tap Next on your phone to go section by section.'];
+  const HINTS = ['Type your name to start.', "Maya and Jordan are here. Drag their phones close to yours to connect.", 'Tap the white dots and shuffle.', 'Add what you got. Do it a couple of times. Friends add things too.', 'Put it on the TV. Tap Next on your phone to go moment by moment.'];
   function step(i) { $('#hint').textContent = HINTS[i] || ''; }
   // the phone keeps its real 360×760 size, scaled to fit the screen
   function fit() {
@@ -924,7 +923,7 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
       const k = m ? KINDS[m.kind] : KINDS[ORDER[i]];
       const bg = m && m.src && m.kind !== 'voice' ? `url(${m.src}) center/cover` : m && m.art ? `url(${m.art}) center/cover` : k.color;
       return `<div class="t" style="width:${s[3] * .78}px;height:${s[4] * .78}px;left:calc(50% + ${s[0] * .78}px);top:calc(50% + ${s[1] * .78}px);translate:-50% -50%;rotate:${s[2]}deg;background:${bg};opacity:${m ? 1 : .45}"></div>`;
-    }).join('') + `<div class="date"><small>Opens</small><b>${S.weeks ? 'Tonight' : `${reveal.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} · ${reveal.getFullYear()}`}</b></div>`;
+    }).join('') + `<div class="date"><b>${S.weeks ? 'Tonight' : `${reveal.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} · ${reveal.getFullYear()}`}</b></div>`;
     const n = S.moments.length;
     $('#sealedCount').textContent = `${n} moment${n === 1 ? '' : 's'} sealed`;
     $('#openNow').disabled = S.moments.filter((m) => m.by === S.me).length < 1;
@@ -964,9 +963,9 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
   function land() { mode = 'land'; modeT = 0; last = winner; tick(1600); buzz([10, 40, 20]); blobs.forEach((b) => { b.vx *= .3; b.vy *= .3; }); }
   function showResult() {
     shown = true; const k = KINDS[winner];
-    $('#rTitle').textContent = k.title; $('#rIcon').innerHTML = `<svg viewBox="0 0 24 24">${k.icon}</svg>`;
+    $('#rTitle').textContent = ({ photo: 'A photo!', video: 'A video!', voice: 'A voice note!', doodle: 'Ooh, a doodle.', word: 'Words.' })[winner]; $('#rIcon').innerHTML = `<svg viewBox="0 0 24 24">${k.icon}</svg>`;
     $('#rLine').textContent = SCENES[S.scene] ? SCENES[S.scene].ask : k.lines[Math.floor(Math.random() * 3)];
-    $('#rReroll').outerHTML = rerolls > 0 && !SCENES[S.scene] ? `<button class="reroll" id="rReroll">↻ Reroll · 1 free</button>` : `<span class="reroll it serif" id="rReroll" style="color:var(--muted)">Fate has spoken.</span>`;
+    $('#rReroll').outerHTML = rerolls > 0 && !SCENES[S.scene] ? `<button class="reroll" id="rReroll">↻ 1 free reroll</button>` : `<span class="reroll it serif" id="rReroll" style="color:var(--muted)">Fate has spoken.</span>`;
     const rr = $('#rReroll'); if (rr.tagName === 'BUTTON') rr.addEventListener('click', () => { rerolls--; startSpin(); });
     $('#shufSpin').classList.add('off'); $('#result').classList.remove('off'); chime();
   }

@@ -405,7 +405,7 @@ private struct TitleCard: View {
             Text(RevealCompiler.counts(items)).font(.copy(14)).foregroundStyle(Palette.ink.opacity(0.8)).padding(.top, 6)
             VStack(spacing: 6) {
                 if inRoom.isEmpty {
-                    Text("Friends: open Presents to join").font(.copy(12)).foregroundStyle(Palette.secondary)
+                    Text("Open Presents to join.").font(.copy(12)).foregroundStyle(Palette.secondary)
                 } else {
                     HStack(spacing: -6) { ForEach(inRoom, id: \.self) { Avatar(name: $0, size: 28) } }
                     Text("\(inRoom.count) in the room").font(.copy(12)).foregroundStyle(Palette.secondary)
@@ -479,8 +479,6 @@ private struct CollageScene: View {
                                    height: geo.size.height * (lines.isEmpty ? 0.72 : 0.6) * scale))
                 if !lines.isEmpty {
                     let line = lines[min(lineIndex, lines.count - 1)]
-                    Text("— \(line.by)").font(.copy(13)).foregroundStyle(Palette.secondary)
-                        .opacity(sharp && !paused ? 1 : 0)
                     Text(line.text ?? "")
                         .font(.display(30))
                         .foregroundStyle(Palette.ink)
@@ -539,12 +537,9 @@ private struct CollageScene: View {
                                                 .shadow(color: .black.opacity(0.7), radius: 8)
                                                 .opacity(sharp && !paused ? 1 : 0)
                                         }
-                                        HStack(spacing: 6) {
-                                            Avatar(name: item.by, size: 20)
-                                            Text("\(item.by) · \(RevealCompiler.time(item.at))")
-                                                .font(.system(size: 11, weight: .medium))
-                                                .foregroundStyle(.white)
-                                        }
+                                        Text(RevealCompiler.time(item.at))
+                                            .font(.system(size: 11, weight: .medium))
+                                            .foregroundStyle(.white)
                                         .padding(.horizontal, 6).padding(.vertical, 4)
                                         .background(Capsule().fill(.black.opacity(0.45)))
                                     }
@@ -735,7 +730,7 @@ struct RevealCompanionView: View {
             VStack(spacing: 12) {
                 Text("Hide this \(item.kind.title.lowercased()) from the room?")
                     .font(.display(24)).foregroundStyle(Palette.ink)
-                Text("It blurs back on the TV. Nobody sees who hid it.")
+                Text("It blurs back on the TV. Nobody sees who.")
                     .font(.copy(13)).foregroundStyle(Palette.secondary)
                 HStack(spacing: 12) {
                     Button("Hide it") {
@@ -744,7 +739,7 @@ struct RevealCompanionView: View {
                         withAnimation { confirmHide = nil }
                     }
                     .buttonStyle(.pill)
-                    Button("Keep it") { withAnimation { confirmHide = nil } }
+                    Button("Leave it") { withAnimation { confirmHide = nil } }
                         .buttonStyle(.frostedPill)
                 }
             }

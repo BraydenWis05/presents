@@ -78,8 +78,7 @@ struct CaptureView: View {
                     HStack(spacing: 14) {
                         MediaOrb(color: kind.orbColor, size: 54, softness: 4)
                         VStack(alignment: .leading, spacing: 2) {
-                            TagLabel(with.isEmpty ? kind.title : "\(kind.title) · with \(Together.names(with))")
-                            Text(kind.invitation)
+                            Text(kind.title)
                                 .font(.display(28))
                                 .foregroundStyle(Palette.ink)
                         }
@@ -98,7 +97,6 @@ struct CaptureView: View {
 
                     if kind != .word {
                     VStack(alignment: .leading, spacing: 8) {
-                        TagLabel("Caption, if you want")
                         TextField("", text: $caption, prompt: Text("say less").foregroundStyle(Palette.secondary))
                             .font(.copy(17))
                             .padding(12)
@@ -106,7 +104,7 @@ struct CaptureView: View {
                     }
                     }
 
-                    Text("One take, no redos. Once it's in, it's sealed. Even from you.")
+                    Text("One take. Sealed, even from you.")
                         .font(.copy(13))
                         .foregroundStyle(Palette.secondary)
                         .frame(maxWidth: .infinity)
@@ -182,7 +180,7 @@ struct CaptureView: View {
             }
             if videoURL == nil && !loadingVideo {
                 cameraButton("Open camera")
-                Text("Up to \(Int(CameraPicker.maxVideoLength)) seconds. Shaky is fine.")
+                Text("Shaky is fine.")
                     .font(.tag(11))
                     .foregroundStyle(Palette.secondary)
             }
@@ -293,9 +291,8 @@ struct CaptureView: View {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 52))
                     .foregroundStyle(Palette.accent)
-                Text("It's in the roll.")
+                Text("It's in.")
                     .font(.display(40))
-                TagLabel("You'll see it on reveal night, with everyone")
             }
             .foregroundStyle(Palette.ink)
         }

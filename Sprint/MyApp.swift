@@ -3,7 +3,6 @@ import SwiftUI
 @main struct PresentsApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @State private var store = RollStore()
-    @State private var presence = PresenceMonitor()
     @State private var night = NightRoom()
 
     init() {
@@ -14,7 +13,6 @@ import SwiftUI
         WindowGroup {
             RootView()
                 .environment(store)
-                .environment(presence)
                 .environment(night)
         }
     }
@@ -22,7 +20,6 @@ import SwiftUI
 
 struct RootView: View {
     @Environment(RollStore.self) private var store
-    @Environment(PresenceMonitor.self) private var presence
     @Environment(NightRoom.self) private var night
     @Environment(\.scenePhase) private var scenePhase
     @State private var tab: Tab = .roll
@@ -47,7 +44,7 @@ struct RootView: View {
                         TabPills(tab: $tab)
                         Spacer()
                         CaptureButton(enabled: store.activeRoll != nil) {
-                            store.captureRequest = CaptureRequest(with: store.togetherNow)
+                            store.captureRequest = CaptureRequest()
                         }
                     }
                     .padding(.horizontal, 20)
@@ -82,16 +79,12 @@ struct RootView: View {
         .onChange(of: night.setup?.rollID) { _, id in
             if night.role == .guest, let id { store.markRevealed(id) }
         }
-        .onAppear { updatePresence(); store.refreshWidget(); openToPicker(); listenForNight() }
+        .onAppear { store.refreshWidget(); openToPicker(); listenForNight() }
         .onChange(of: scenePhase) { _, phase in
-            updatePresence()
             listenForNight()
             if phase == .background { wasAway = true }
             if phase == .active { openToPicker() }
         }
-        .onChange(of: store.activeRoll?.id) { updatePresence() }
-        .onChange(of: store.state.presencePromptsOn) { updatePresence() }
-        .onChange(of: presence.together) { _, together in store.togetherNow = together }
         .sheet(isPresented: Binding(get: { store.pendingInvite != nil }, set: { if !$0 { store.pendingInvite = nil } })) {
             if let invite = store.pendingInvite {
                 JoinFromLinkView(invite: invite)
@@ -108,7 +101,7 @@ struct RootView: View {
             }
             tab = .roll
             if url.host == "capture", store.activeRoll != nil {
-                store.captureRequest = CaptureRequest(with: store.togetherNow)
+                store.captureRequest = CaptureRequest()
             }
         }
     }
@@ -119,7 +112,7 @@ struct RootView: View {
         wasAway = false
         guard night.role != .guest, let roll = store.activeRoll, !roll.isReadyToOpen, store.captureRequest == nil else { return }
         tab = .roll
-        store.captureRequest = CaptureRequest(with: store.togetherNow)
+        store.captureRequest = CaptureRequest()
     }
 
     /// While the app is open, watch for a friend starting presentation night for one of our rolls.
@@ -129,15 +122,6 @@ struct RootView: View {
         let ids = [store.activeRoll?.id, store.chapters.first?.id].compactMap { $0 }
         night.listen(rollIDs: ids, me: store.state.me)
     }
-
-    /// Look for other members only while the app is open and they've opted in.
-    private func updatePresence() {
-        if scenePhase == .active, store.state.presencePromptsOn, let roll = store.activeRoll {
-            presence.start(me: store.state.me, rollID: roll.id, members: roll.members)
-        } else if scenePhase != .inactive {
-            presence.stop()
-        }
-    }
 }
 
 /// Our Roll / Chapters, as a small floating pill on the left.
@@ -146,7 +130,7 @@ struct TabPills: View {
 
     var body: some View {
         HStack(spacing: 2) {
-            tabButton("Our Roll", .roll)
+            tabButton("Now", .roll)
             tabButton("Chapters", .chapters)
         }
         .padding(5)
@@ -178,7 +162,7 @@ struct CaptureButton: View {
         }
         .disabled(!enabled)
         .opacity(enabled ? 1 : 0.3)
-        .accessibilityLabel("Add to the roll")
+        .accessibilityLabel("Add a moment")
     }
 }
 

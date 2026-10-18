@@ -55,18 +55,15 @@ struct SettingsView: View {
                                 Avatar(name: name, size: 32)
                                 Text(name == store.state.me ? "\(name) (you)" : name)
                                 Spacer()
-                                if store.togetherNow.contains(name) {
-                                    Text("Nearby").font(.footnote).foregroundStyle(.green)
-                                }
                             }
                         }
                         if let link = store.inviteLink, roll.members.count < GroupRules.maxSize {
                             ShareLink(
                                 item: link,
                                 subject: Text("Join \(roll.name)"),
-                                message: Text("Join our roll \"\(roll.name)\" on Presents. Everything stays sealed until we open it together.")
+                                message: Text("Join \"\(roll.name)\" on Presents. It stays sealed until we open it together.")
                             ) {
-                                Label("Invite someone", systemImage: "person.badge.plus")
+                                Label("Invite", systemImage: "person.badge.plus")
                             }
                         }
                     } header: {
@@ -76,7 +73,7 @@ struct SettingsView: View {
                     // Reveal
                     Section {
                         DatePicker(
-                            "Reveal date",
+                            "Opens",
                             selection: Binding(
                                 get: { roll.revealDate },
                                 set: { date in store.updateActive { $0.revealDate = date } }
@@ -84,12 +81,11 @@ struct SettingsView: View {
                             in: Date.now...,
                             displayedComponents: .date
                         )
-                        LabeledContent("Moments sealed", value: "\(roll.moments.count)")
-                        Button("Open it tonight instead") { confirmOpenNow = true }
+                        Button("Open it tonight") { confirmOpenNow = true }
                     } header: {
-                        Text("Reveal")
+                        Text("Reveal night")
                     } footer: {
-                        Text("A rough milestone. Move it if life gets in the way.")
+                        Text("Move it if life gets in the way.")
                     }
 
                     // Your moments
@@ -112,17 +108,8 @@ struct SettingsView: View {
                     } header: {
                         Text("Your moments")
                     } footer: {
-                        Text("Swipe to take one back. You never see what's in it. Only until the reveal opens.")
+                        Text("Swipe to take one back. You won't see what it was.")
                     }
-                }
-
-                // Notifications
-                Section {
-                    Toggle("Notice when we're together", isOn: $store.state.presencePromptsOn)
-                } header: {
-                    Text("Notifications")
-                } footer: {
-                    Text("While Presents is open, your phone looks for friends from your group nearby and offers a quiet \"document this?\". Never exact locations.")
                 }
 
                 // Privacy & about
@@ -136,7 +123,7 @@ struct SettingsView: View {
                 // Danger zone
                 Section {
                     if store.activeRoll != nil {
-                        Button("Leave this roll", role: .destructive) { confirmLeave = true }
+                        Button("Leave this chapter", role: .destructive) { confirmLeave = true }
                     }
                     Button("Erase everything on this phone", role: .destructive) { confirmErase = true }
                 } footer: {
@@ -164,20 +151,20 @@ struct SettingsView: View {
             .confirmationDialog("Take this back for good?", isPresented: Binding(get: { takeBack != nil }, set: { if !$0 { takeBack = nil } }), titleVisibility: .visible) {
                 Button("Take it back", role: .destructive) { if let m = takeBack { store.takeBack(m) } }
             }
-            .confirmationDialog("Open the roll tonight?", isPresented: $confirmOpenNow, titleVisibility: .visible) {
-                Button("Ready to open") { store.updateActive { $0.revealDate = .now } }
+            .confirmationDialog("Open it tonight?", isPresented: $confirmOpenNow, titleVisibility: .visible) {
+                Button("Open tonight") { store.updateActive { $0.revealDate = .now } }
             } message: {
-                Text("Moves the reveal date to today, for when you're all together early.")
+                Text("For when you're all together early.")
             }
-            .confirmationDialog("Leave this roll?", isPresented: $confirmLeave, titleVisibility: .visible) {
+            .confirmationDialog("Leave this chapter?", isPresented: $confirmLeave, titleVisibility: .visible) {
                 Button("Leave", role: .destructive) { store.leaveActiveRoll(); dismiss() }
             } message: {
-                Text("What you added stays sealed for the others. You won't be in the reveal.")
+                Text("What you added stays for the others. You'll miss reveal night.")
             }
             .confirmationDialog("Erase everything?", isPresented: $confirmErase, titleVisibility: .visible) {
                 Button("Erase", role: .destructive) { store.eraseEverything(); dismiss() }
             } message: {
-                Text("Your name, rolls and chapters will be removed from this phone.")
+                Text("Your name and every chapter, gone from this phone.")
             }
         }
         .preferredColorScheme(.dark)
@@ -189,10 +176,9 @@ private struct PrivacyView: View {
         Form {
             Section {
                 row("lock", "Sealed, even from you", "Whatever you add is sealed the moment you save it. You can't look at it again until reveal night.")
-                row("person.2", "Only your group", "Only the people who joined in person or with your invite link are in a roll.")
+                row("person.2", "Only your group", "Only the people you started with, or who got your link.")
                 row("tv", "Opened together", "Everything opens at once, on one screen, with everyone in the room.")
                 row("eye.slash", "Hide anything", "During the reveal, anyone can quietly hide a moment. Nobody sees who did.")
-                row("location.slash", "No locations", "Noticing you're together uses nearby phones only. Presents never stores where you are.")
             }
         }
         .scrollContentBackground(.hidden)

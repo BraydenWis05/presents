@@ -163,22 +163,22 @@ nonisolated enum RevealCompiler {
         return "\(md(from)) · \(y(from)) – \(md(to)) · \(y(to))"
     }
 
-    /// "Saturday Night". Late night counts toward the evening before.
+    /// "Saturday night". Late night counts toward the evening before.
     static func section(_ date: Date) -> String {
         let hour = Calendar.current.component(.hour, from: date)
         let day = hour < 4 ? date.addingTimeInterval(-6 * 3600) : date
         let part = switch hour {
-        case 4..<12: "Morning"
-        case 12..<17: "Afternoon"
-        case 17..<21: "Evening"
-        default: "Night"
+        case 4..<12: "morning"
+        case 12..<17: "afternoon"
+        case 17..<21: "evening"
+        default: "night"
         }
         return "\(day.formatted(.dateTime.weekday(.wide))) \(part)"
     }
 
     /// "SAT 9:48"
     static func stamp(_ date: Date) -> String {
-        "\(date.formatted(.dateTime.weekday(.abbreviated)).uppercased()) \(date.formatted(.dateTime.hour(.defaultDigits(amPM: .omitted)).minute()))"
+        "\(date.formatted(.dateTime.weekday(.abbreviated))) \(date.formatted(.dateTime.hour(.defaultDigits(amPM: .omitted)).minute()))"
     }
 
     /// "3:06 pm"

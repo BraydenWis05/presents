@@ -110,7 +110,7 @@ struct PresentsWidgetView: View {
                 .lineLimit(3)
                 .minimumScaleFactor(0.75)
                 .padding(.bottom, 4)
-            Text(snapshot.isReadyToOpen ? "Ready to open" : "Opens \(snapshot.revealDate.formatted(.dateTime.month(.abbreviated).day()))")
+            Text(snapshot.isReadyToOpen ? "Ready to open" : snapshot.revealDate.formatted(.dateTime.month(.abbreviated).day()))
                 .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(Look.secondary)
         }
@@ -147,7 +147,7 @@ struct PresentsWidgetView: View {
                     .foregroundStyle(Look.ink)
                     .lineLimit(3)
                     .minimumScaleFactor(0.8)
-                Text(snapshot.isReadyToOpen ? "Ready to open together" : "\(snapshot.momentCount) sealed · opens \(snapshot.revealDate.formatted(.dateTime.month(.abbreviated).day()))")
+                Text(snapshot.isReadyToOpen ? "Ready to open together" : snapshot.revealDate.formatted(.dateTime.month(.abbreviated).day()))
                     .font(.system(size: 11))
                     .foregroundStyle(Look.secondary)
                     .lineLimit(1)
@@ -160,7 +160,7 @@ struct PresentsWidgetView: View {
         VStack(alignment: .leading, spacing: 4) {
             Spacer()
             Text("Presents").font(.system(size: 11, weight: .semibold)).foregroundStyle(Look.secondary)
-            Text("Start a roll together").font(Look.serif(20)).foregroundStyle(Look.ink)
+            Text("Start a chapter together").font(Look.serif(20)).foregroundStyle(Look.ink)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -171,8 +171,8 @@ struct PresentsWidget: Widget {
         StaticConfiguration(kind: "PresentsRoll", provider: RollProvider()) { entry in
             PresentsWidgetView(entry: entry)
         }
-        .configurationDisplayName("Your roll")
-        .description("A little nudge to notice the moment. Tap to add it.")
+        .configurationDisplayName("Presents")
+        .description("A little line to notice the moment by.")
         .supportedFamilies([.systemSmall, .systemMedium])
     }
 }

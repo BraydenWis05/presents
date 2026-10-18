@@ -23,11 +23,22 @@ extension MomentKind {
     /// The short line under the result title.
     var lines: [String] {
         switch self {
-        case .video: ["Show us what's in front of you", "Ten seconds, no edits", "Pan slowly across the room"]
-        case .doodle: ["Draw it badly, on purpose", "Sketch the view from where you are", "Doodle what you had for lunch"]
-        case .photo: ["Catch what caught your eye", "Something blue, close by", "The light where you are right now"]
-        case .voice: ["Say the thing out loud", "Hum the song stuck in your head", "Tell someone about your morning"]
-        case .word, .note: ["Write the one line you'd forget", "Something you overheard today", "What you'd tell yourself a year ago"]
+        case .photo: ["Point it at whatever is happening."]
+        case .video: ["Ten seconds. No retakes."]
+        case .voice: ["Say the thing out loud."]
+        case .doodle: ["Bad art strongly encouraged."]
+        case .word, .note: ["A few words. Make it an inside joke."]
+        }
+    }
+
+    /// What the shuffle says when it lands.
+    var headline: String {
+        switch self {
+        case .photo: "A photo!"
+        case .video: "A video!"
+        case .voice: "A voice note!"
+        case .doodle: "Ooh, a doodle."
+        case .word, .note: "Words."
         }
     }
 
@@ -295,10 +306,6 @@ struct MediaPickerView: View {
 
                 GrainOverlay().opacity(0.8).allowsHitTesting(false).ignoresSafeArea()
 
-                if !with.isEmpty {
-                    TagLabel("With \(Together.names(with))")
-                        .position(x: geo.size.width / 2, y: 70)
-                }
             }
             .onAppear {
                 engine.size = geo.size
@@ -346,10 +353,6 @@ struct MediaPickerView: View {
             FiveDotMark(mono: true)
                 .frame(width: size.width * 0.15, height: size.width * 0.15)
                 .position(x: size.width / 2, y: size.height * 0.42)
-            Text("capture a moment")
-                .font(.displayItalic(size.width * 0.074))
-                .foregroundStyle(Color(hex: 0xF3F5F2))
-                .position(x: size.width / 2, y: size.height * 0.66)
             Text(engine.mode == .charging && engine.charge > 0.12 ? "let go…" : "Shuffle")
                 .font(.system(size: size.width * 0.046, weight: .medium))
                 .foregroundStyle(Color(hex: 0x0B1316))
@@ -399,7 +402,7 @@ struct MediaPickerView: View {
     private func result(in size: CGSize) -> some View {
         let on = engine.showResult
         return ZStack {
-            Text(engine.winner.title)
+            Text(engine.winner.headline)
                 .font(.displayItalic(size.width * 0.096))
                 .foregroundStyle(Palette.ink)
                 .position(x: size.width / 2, y: size.height * 0.243)
@@ -426,7 +429,7 @@ struct MediaPickerView: View {
                         rerollsLeft -= 1
                         engine.start()
                     } label: {
-                        Label("Reroll", systemImage: "arrow.triangle.2.circlepath")
+                        Label("1 free reroll", systemImage: "arrow.triangle.2.circlepath")
                             .font(.system(size: size.width * 0.048))
                             .foregroundStyle(.white)
                     }
