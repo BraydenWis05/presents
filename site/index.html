@@ -829,8 +829,8 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
     S.scene = i;
     const card = $('#scene'), fin = i >= SCENES.length;
     if (!fin) { const d = new Date(); d.setDate(d.getDate() - ((d.getDay() + 1) % 7)); d.setHours(SCENES[i].h, SCENES[i].m, 0, 0); S.clock = d.getTime(); }
-    const when = fin ? 'Six weeks later' : `${new Date(S.clock).toLocaleDateString('en-US', { weekday: 'long' })} · ${new Date(S.clock).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
-    card.innerHTML = `<small>${when}</small><b>${fin ? "A whole semester of little moments later, it's reveal night." : SCENES[i].line}</b><span>${fin ? "Everyone's in one room. Nobody has seen a thing, not even what they added." : (SCENES[i].sub || '')}</span>`;
+    const when = fin ? 'A few weeks later' : `${new Date(S.clock).toLocaleDateString('en-US', { weekday: 'long' })} · ${new Date(S.clock).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
+    card.innerHTML = `<small>${when}</small><b>${fin ? "Reveal night." : SCENES[i].line}</b><span>${fin ? "Everyone's in one room. Nobody has seen a thing, not even what they added." : (SCENES[i].sub || '')}</span>`;
     card.style.backgroundImage = !fin && SCENES[i].img ? `linear-gradient(180deg, rgba(8,14,16,.35), rgba(8,14,16,.82)), url(${SCENES[i].img})` : '';
     card.innerHTML += `<em>tap to continue</em>`;
     const prev = S.view; S.view = 'scene'; card.classList.add('on');
@@ -844,13 +844,17 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
     card.onclick = done; card._t = setTimeout(done, !fin && SCENES[i].img ? 7000 : 4200); tick(700);
   }
 
+  // reveal only covers the day you just lived through: top up each moment with friends' adds
   function addWeeks() {
     if (S.weeks) return; S.weeks = true;
-    const base = S.clock, day = 864e5, at = (d, h) => { const t = new Date(base - d * day); t.setHours(h, Math.floor(Math.random() * 50)); return t.getTime(); };
-    [['Jordan', 'word', 'first day of spring and it is already 80 degrees', 20, 13], ['Maya', 'photo', null, 20, 13],
-     ['Maya', 'voice', null, 12, 20], ['Jordan', 'doodle', null, 12, 20], ['Maya', 'word', 'we really did karaoke on a tuesday', 12, 21],
-     ['Jordan', 'photo', null, -9, 19], ['Maya', 'word', 'last dinner at the dining hall', -9, 19]]
-      .forEach(([by, kind, text, d, h], k) => S.moments.push({ by, kind, text, at: at(d, h), art: kind === 'doodle' ? sampleDoodle(k) : kind === 'photo' ? gradientPhoto(...PHOTOS[k % 3]) : null }));
+    const sat = new Date(); sat.setDate(sat.getDate() - ((sat.getDay() + 1) % 7));
+    const at = (h, m) => { const t = new Date(sat); t.setHours(h, m, 0, 0); return t.getTime(); };
+    S.moments = S.moments.filter((m) => m.by === S.me || SCENES.some((sc) => Math.abs(m.at - at(sc.h, sc.m)) < 45 * 60e3));
+    const extra = { 0: [['Maya', 'photo', null, 6], ['Jordan', 'word', 'maya fully jumped in with her shoes on', 11]], 1: [['Jordan', 'voice', null, 4], ['Maya', 'word', 'same time next year?', 9]] };
+    SCENES.forEach((sc, i) => {
+      const t0 = at(sc.h, sc.m), have = S.moments.filter((m) => m.by !== S.me && Math.abs(m.at - t0) < 45 * 60e3).length;
+      extra[i].slice(0, Math.max(0, 2 - have)).forEach(([by, kind, text, dm], k) => S.moments.push({ by, kind, text, at: t0 + dm * 60e3, art: kind === 'photo' ? gradientPhoto(...PHOTOS[(i + k) % 3]) : null }));
+    });
   }
   let toastTimer = null;
   function toast(name, title, sub) {
