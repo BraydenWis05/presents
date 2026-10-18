@@ -511,6 +511,10 @@ body.ready .nav { opacity: 1; translate: -50% 0; pointer-events: auto; }
 .orb .orb-glow i { position: absolute; inset: 14%; border-radius: 50%; background: radial-gradient(circle, var(--c) 0%, color-mix(in srgb, var(--c) 50%, transparent) 30%, transparent 68%); opacity: .78; translate: var(--x) var(--y); animation: orbdrift 9s ease-in-out infinite alternate; animation-delay: var(--d); }
 @keyframes orbspin { to { rotate: 360deg; } }
 @keyframes orbdrift { from { translate: var(--x) var(--y); } to { translate: calc(var(--x) * -.6) calc(var(--y) * -.6); } }
+.orb .orb-glow, .orb .core { transition: opacity 1.2s ease, scale 1.4s cubic-bezier(.2,.8,.2,1); }
+body:not(.ready) .orb .orb-glow { opacity: 0; scale: .55; }
+body:not(.ready) .orb .core { opacity: 0; scale: .9; }
+body:not(.ready) .cue { opacity: 0 !important; }
 .orb .core { position: relative; display: grid; justify-items: center; gap: 10px; text-shadow: 0 0 30px rgba(6,12,14,.85), 0 0 8px rgba(6,12,14,.6); }
 .orb .core .mark { position: relative; inset: auto; margin: 0; width: calc(var(--s) * .16); height: calc(var(--s) * .16); }
 .orb .core .mark b { box-shadow: 0 0 14px rgba(255,255,255,.5); }
@@ -569,16 +573,6 @@ body.ready .nav { opacity: 1; translate: -50% 0; pointer-events: auto; }
   </div>
   <b class="intro-word">Presents</b>
   <span class="intro-sub">capture a moment, together</span>
-  <div class="story" id="story">
-    <p>Your last semester together goes fast.</p>
-    <p>You take a thousand photos. You never look at them again.</p>
-    <p>The best parts weren't the posed ones anyway. They were the little things.</p>
-    <p>So catch the little things as they happen. A photo. A voice note. A doodle. A few words.</p>
-    <p>Then seal them. Nobody sees them. Not even you.</p>
-    <p>Until one night, in one room, you open it together.</p>
-    <p class="welcome"><span>Welcome to</span><span class="wlogo"><span class="mark" id="welcomeMark"></span>Presents</span></p>
-  </div>
-  <button class="ghost skip" id="storySkip">Skip</button>
 </div>
 
 <div class="scene-card" id="scene"></div>
@@ -818,7 +812,7 @@ body.ready .nav { opacity: 1; translate: -50% 0; pointer-events: auto; }
     const spots = [[50, 17], [83, 41], [70, 79], [30, 79], [17, 41]];
     el.innerHTML = spots.map(([x, y]) => `<b style="left:${x}%;top:${y}%;background:${color}"></b>`).join('');
   }
-  markHTML($('#heroMark')); markHTML($('#orbMark')); markHTML($('#footMark')); markHTML($('#introMark')); markHTML($('#welcomeMark')); markHTML($('#bentoMark')); markHTML($('#replayMark')); $$('#introMark b').forEach((b, i) => b.style.animationDelay = (1.15 + i * .07) + 's');
+  markHTML($('#heroMark')); markHTML($('#orbMark')); markHTML($('#footMark')); markHTML($('#introMark')); markHTML($('#bentoMark')); markHTML($('#replayMark')); $$('#introMark b').forEach((b, i) => b.style.animationDelay = (1.15 + i * .07) + 's');
   const intro = $('#intro'), endIntro = () => { intro.classList.add('done'); document.body.classList.add('ready'); setTimeout(() => { intro.style.display = 'none'; }, 950); };
   const beats = $$('#story > *'); let beat = -1, beatTimer = null;
   function nextBeat() {
@@ -829,9 +823,9 @@ body.ready .nav { opacity: 1; translate: -50% 0; pointer-events: auto; }
     if (beat < beats.length - 1) beatTimer = setTimeout(nextBeat, 3200);
     else { chime(); beatTimer = setTimeout(endIntro, 3000); }
   }
-  setTimeout(() => { if (!intro.classList.contains('done')) { const gr = $('.intro-glow').getBoundingClientRect(); intro.style.setProperty('--gx', (innerWidth / 2 - (gr.left + gr.width / 2)) + 'px'); intro.style.setProperty('--gy', (innerHeight / 2 - (gr.top + gr.height / 2)) + 'px'); intro.classList.add('telling'); setTimeout(nextBeat, 700); } }, 3000);
-  intro.addEventListener('click', (e) => { if (e.target.closest('button')) return; if (intro.classList.contains('telling')) nextBeat(); });
-  $('#storySkip').addEventListener('click', endIntro); markHTML($('#shufMark')); markHTML($('#capMark'), '#0B1316');
+  setTimeout(() => { if (!intro.classList.contains('done')) endIntro(); }, 3000);
+  intro.addEventListener('click', () => { if (!intro.classList.contains('done')) endIntro(); });
+  markHTML($('#shufMark')); markHTML($('#capMark'), '#0B1316');
 
   // ---------- tiny sound + haptics ----------
   let ac = null;
