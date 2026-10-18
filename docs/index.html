@@ -472,6 +472,12 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
 .bento-wrap { text-align: left; }
 .hglow { top: 34%; width: min(56%, 380px); }
 @media (max-width: 900px) { .hero { min-height: 480px; } .hglow { top: 30%; width: 62%; } }
+.notebox { display: grid; gap: 8px; width: min(100%, 460px); }
+.notebox textarea { width: 100%; resize: none; border-radius: 16px; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); color: #fff; font: inherit; font-size: 15px; padding: 12px 16px; outline: none; }
+.noterow { display: flex; gap: 8px; }
+.noterow input { flex: 1; min-width: 0; padding: 12px 16px; border-radius: 99px; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); color: #fff; font: inherit; font-size: 15px; outline: none; }
+.notebox textarea:focus, .noterow input:focus { border-color: rgba(255,255,255,.5); }
+.notebox .note { text-align: left; margin: 0; min-height: 1.2em; }
 </style>
 
 <div class="grain"></div>
@@ -515,8 +521,14 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
       <section class="c hide"><div class="art"><div class="hid"><span></span><svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/><path d="M3 3l18 18"/></svg></div></div><h4>Hide anything</h4><p>Anyone can quietly hide a moment. Nobody sees who.</p></section>
       <a class="c svsd" href="https://svsdschool.github.io/competition/" target="_blank" rel="noopener"><span class="arrow">↗</span><small>designed for</small><h4>SVSD Design Sprint</h4><p>A national student design &amp; prototyping competition.</p></a>
       <section class="c team"><small>made by</small><div class="faces3" id="faces3"></div></section>
-      <section class="c signup-c"><div><h3>Think this should exist?</h3><p>Leave your email and we'll tell you when Presents is ready.</p></div>
-        <div><form id="signup" class="signup"><input id="email" type="email" required placeholder="you@school.edu" autocomplete="email"><button class="pill" id="signupGo">Count me in</button></form><p class="note" id="signupMsg"></p></div></section>
+      <section class="c signup-c">
+        <div><h3>Leave us a note</h3><p>Think this should exist? Have an idea? Tell us. Add your email if you want to hear when Presents is ready.</p></div>
+        <form id="note" class="notebox">
+          <textarea id="noteText" maxlength="500" rows="2" placeholder="I'd use this for…" required></textarea>
+          <div class="noterow"><input id="noteEmail" type="email" placeholder="your email (optional)" autocomplete="email"><button class="pill" id="noteGo">Send</button></div>
+          <p class="note" id="noteMsg"></p>
+        </form>
+      </section>
     </div>
   </div>
 </div>
@@ -1174,19 +1186,14 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
   }
   $('#replay').addEventListener('click', () => { location.hash = 'again'; location.reload(); });
   if (location.hash === '#again') { history.replaceState(null, '', location.pathname + location.search); endIntro(); }
-  $('#signup').addEventListener('submit', async (ev) => {
+  const NOTE_TO = ''; // where notes go
+  $('#note').addEventListener('submit', (ev) => {
     ev.preventDefault();
-    const email = $('#email').value.trim(), msg = $('#signupMsg'); if (!email) return;
-    $('#signupGo').disabled = true; msg.textContent = 'Saving…';
-    try {
-      const db = await window.claude?.use?.('db'), user = await window.claude?.use?.('user');
-      if (!db || !user) throw new Error('none');
-      const id = await user.id();
-      await db.doc('signups/' + id).set({ email, at: new Date().toISOString() });
-      msg.textContent = "You're on the list. Thank you."; $('#email').disabled = true; chime();
-    } catch (err) {
-      msg.textContent = "Couldn't save it here. Sign in to claude.ai and try again."; $('#signupGo').disabled = false;
-    }
+    const text = $('#noteText').value.trim(), email = $('#noteEmail').value.trim(); if (!text) return;
+    if (!NOTE_TO) { $('#noteMsg').textContent = 'Notes open soon.'; return; }
+    const body = text + (email ? `\n\nFrom: ${email}` : '');
+    location.href = `mailto:${NOTE_TO}?subject=${encodeURIComponent('A note about Presents')}&body=${encodeURIComponent(body)}`;
+    $('#noteMsg').textContent = 'Thanks. Your email app should open with the note ready to send.';
   });
   $('#compBack').addEventListener('click', () => go(-1));
   const stage = $('#stage');
