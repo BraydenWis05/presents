@@ -42,6 +42,9 @@ final class VoiceRecorder: NSObject, AVAudioRecorderDelegate {
     var elapsed: TimeInterval = 0
     var recordedURL: URL?
     var permissionDenied = false
+    /// Recent loudness, 0...1, newest last. Drives the live waveform.
+    var levels: [CGFloat] = []
+    static let levelCount = 70
 
     @ObservationIgnored private var recorder: AVAudioRecorder?
     @ObservationIgnored private var tick: Task<Void, Never>?
@@ -69,15 +72,23 @@ final class VoiceRecorder: NSObject, AVAudioRecorderDelegate {
         ]
         guard let recorder = try? AVAudioRecorder(url: url, settings: settings) else { return }
         recorder.delegate = self
+        recorder.isMeteringEnabled = true
         recorder.record(forDuration: Self.maxLength)
         self.recorder = recorder
         isRecording = true
         elapsed = 0
+        levels = []
         tick = Task { [weak self] in
             while !Task.isCancelled {
-                try? await Task.sleep(for: .milliseconds(100))
+                try? await Task.sleep(for: .milliseconds(60))
                 guard let self, let recorder = self.recorder, recorder.isRecording else { break }
                 self.elapsed = recorder.currentTime
+                recorder.updateMeters()
+                // -50 dB (quiet room) ... 0 dB (loud) mapped to 0...1, a little curved so speech fills the height.
+                let db = CGFloat(recorder.averagePower(forChannel: 0))
+                let level = pow(max(0, min(1, (db + 50) / 50)), 1.6)
+                self.levels.append(level)
+                if self.levels.count > Self.levelCount { self.levels.removeFirst(self.levels.count - Self.levelCount) }
             }
         }
     }
@@ -90,6 +101,7 @@ final class VoiceRecorder: NSObject, AVAudioRecorderDelegate {
         if let url = recordedURL { try? FileManager.default.removeItem(at: url) }
         recordedURL = nil
         elapsed = 0
+        levels = []
     }
 
     private func finish(success: Bool) {

@@ -181,6 +181,7 @@ struct PresentsWidget: Widget {
 struct PresentsWidgetBundle: WidgetBundle {
     var body: some Widget {
         PresentsWidget()
+        PresentsCaptureControl()
     }
 }
 

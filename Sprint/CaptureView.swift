@@ -47,8 +47,6 @@ struct CaptureView: View {
             if started == nil {
                 MediaPickerView(with: with) { picked in
                     withAnimation(.easeInOut(duration: 0.35)) { started = picked }
-                    // Voice starts recording right away: the button said "Record".
-                    if picked == .voice { Task { await recorder.start() } }
                     if picked == .photo || picked == .video, UIImagePickerController.isSourceTypeAvailable(.camera) {
                         showCamera = true
                     }
@@ -207,27 +205,32 @@ struct CaptureView: View {
 
     private var voiceCapture: some View {
         VStack(spacing: 16) {
-            if recorder.recordedURL == nil {
-            Button {
-                Task { await recorder.toggle() }
-            } label: {
-                ZStack {
-                    Circle()
-                        .fill(recorder.isRecording ? Palette.pink : Palette.ink)
-                        .frame(width: 110, height: 110)
-                    Image(systemName: recorder.isRecording ? "stop.fill" : "mic")
-                        .font(.system(size: 34, weight: .light))
-                        .foregroundStyle(Palette.backgroundTop)
-                }
-                .scaleEffect(recorder.isRecording ? 1.05 : 1)
-                .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: recorder.isRecording)
-            }
-            .accessibilityLabel(recorder.isRecording ? "Stop recording" : "Record")
-            }
+            LiveWaveform(levels: recorder.levels, recording: recorder.isRecording)
+                .frame(height: 120)
 
-            Text(timeString(recorder.elapsed) + " / " + timeString(VoiceRecorder.maxLength))
+            Text(timeString(recorder.elapsed))
+                .font(.display(34))
+                .monospacedDigit()
+                .foregroundStyle(Palette.ink)
+            Text(recorder.isRecording ? "Tap to stop" : recorder.recordedURL == nil ? "Tap to record · up to \(Int(VoiceRecorder.maxLength))s" : "Got it")
                 .font(.tag(12))
                 .foregroundStyle(Palette.secondary)
+
+            if recorder.recordedURL == nil {
+                // Voice Memos-style: a ring with a red dot that becomes a rounded square while recording.
+                Button {
+                    Task { await recorder.toggle() }
+                } label: {
+                    ZStack {
+                        Circle().stroke(Palette.ink.opacity(0.85), lineWidth: 4).frame(width: 78, height: 78)
+                        RoundedRectangle(cornerRadius: recorder.isRecording ? 8 : 31)
+                            .fill(Color(hex: 0xE2442E))
+                            .frame(width: recorder.isRecording ? 30 : 62, height: recorder.isRecording ? 30 : 62)
+                    }
+                    .animation(.spring(response: 0.3, dampingFraction: 0.8), value: recorder.isRecording)
+                }
+                .accessibilityLabel(recorder.isRecording ? "Stop recording" : "Record")
+            }
 
             if let url = recorder.recordedURL, !recorder.isRecording {
                 Button(player.isPlaying ? "Stop" : "Play it back") {
