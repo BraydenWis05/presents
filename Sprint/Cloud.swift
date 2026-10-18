@@ -98,7 +98,7 @@ final class Cloud {
     // MARK: Requests
 
     private func request(_ path: String, method: String = "GET", query: [URLQueryItem] = [], body: Data? = nil,
-                         contentType: String = "application/json", headers: [String: String] = [:]) async throws -> Data {
+                         contentType: String = "application/json", headers: [String: String] = [:], okIfExists: Bool = false) async throws -> Data {
         var c = URLComponents(url: SupabaseConfig.url.appending(path: path), resolvingAgainstBaseURL: false)!
         if !query.isEmpty { c.queryItems = query }
         var req = URLRequest(url: c.url!)
@@ -109,7 +109,10 @@ final class Cloud {
         req.setValue(contentType, forHTTPHeaderField: "Content-Type")
         for (k, v) in headers { req.setValue(v, forHTTPHeaderField: k) }
         let (data, response) = try await URLSession.shared.data(for: req)
-        if (response as? HTTPURLResponse)?.statusCode == 401 { session = nil }
+        let status = (response as? HTTPURLResponse)?.statusCode
+        if status == 401 { session = nil }
+        // Already there (another phone created the group, or this moment was sent before).
+        if okIfExists, status == 409 { return data }
         try check(response, data)
         return data
     }
@@ -126,9 +129,9 @@ final class Cloud {
     func ensure(rollID: UUID, name: String, revealDate: Date, me: String) async throws {
         let roll = RemoteRoll(id: rollID, name: name, reveal_date: revealDate)
         _ = try await request("rest/v1/rolls", method: "POST", body: try encoder.encode(roll),
-                              headers: ["Prefer": "resolution=ignore-duplicates,return=minimal"])
+                              headers: ["Prefer": "return=minimal"], okIfExists: true)
         _ = try await request("rest/v1/members", method: "POST", body: try encoder.encode(["roll_id": rollID.uuidString, "name": me]),
-                              headers: ["Prefer": "resolution=ignore-duplicates,return=minimal"])
+                              headers: ["Prefer": "return=minimal"], okIfExists: true)
     }
 
     func members(_ rollID: UUID) async throws -> [String] {
@@ -156,7 +159,7 @@ final class Cloud {
             m.thumb_path = path
         }
         _ = try await request("rest/v1/moments", method: "POST", body: try encoder.encode(m),
-                              headers: ["Prefer": "resolution=ignore-duplicates,return=minimal"])
+                              headers: ["Prefer": "return=minimal"], okIfExists: true)
     }
 
     func hide(_ id: UUID, at date: Date) async throws {

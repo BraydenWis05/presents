@@ -164,7 +164,7 @@ struct StartRollView: View {
                     // The whole area focuses the field, not just the text glyphs.
                     .contentShape(Rectangle())
                     .onTapGesture { nameFocused = true }
-                    .onAppear { Task { try? await Task.sleep(for: .seconds(0.35)); nameFocused = true } }
+                    .onAppear { Task { try? await Task.sleep(for: .seconds(0.7)); nameFocused = true } }
                 } else {
                     VStack(alignment: .leading, spacing: 22) {
                         question("add a face, \(myName.trimmingCharacters(in: .whitespaces).isEmpty ? "friend" : myName.trimmingCharacters(in: .whitespaces))")
