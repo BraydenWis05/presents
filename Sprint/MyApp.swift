@@ -60,6 +60,14 @@ struct RootView: View {
         }
         .tint(Palette.ink)
         .preferredColorScheme(.dark)
+        // Keep groups in step across phones while the app is open.
+        .task(id: scenePhase) {
+            guard scenePhase == .active else { return }
+            while !Task.isCancelled {
+                await store.syncWithCloud()
+                try? await Task.sleep(for: .seconds(20))
+            }
+        }
         // A friend started presentation night: this phone becomes a controller, over everything.
         .overlay {
             if night.role == .guest, night.setup != nil {

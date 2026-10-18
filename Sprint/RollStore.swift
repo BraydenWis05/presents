@@ -65,6 +65,7 @@ final class RollStore {
     /// The host seals the roll after everyone joined in person.
     func startRoll(id: UUID, name: String, members: [String], revealDate: Date) {
         state.rolls.append(Roll(id: id, name: name, members: members, revealDate: revealDate))
+        Task { await syncWithCloud() }
     }
 
     /// A guest receives the same roll from the host's phone, or from an invite link.
@@ -74,6 +75,7 @@ final class RollStore {
         if !members.contains(state.me) { members.append(state.me) }
         state.rolls.append(Roll(id: invite.rollID, name: invite.name, members: members, revealDate: invite.revealDate))
         state.presencePromptsOn = invite.noticeTogether
+        Task { await syncWithCloud() }
     }
 
     /// An invite link for the active roll, to bring someone in after setup.
@@ -141,6 +143,7 @@ final class RollStore {
             }
         }
         updateActive { $0.moments.append(moment) }
+        if let rollID = activeRoll?.id { upload(moment, rollID: rollID) }
     }
 
     private static func thumbName(_ id: UUID) -> String { "\(id).thumb.jpg" }
@@ -177,6 +180,7 @@ final class RollStore {
         for r in state.rolls.indices where rollID == nil || state.rolls[r].id == rollID {
             if let m = state.rolls[r].moments.firstIndex(where: { $0.id == momentID }), state.rolls[r].moments[m].hiddenAt == nil {
                 state.rolls[r].moments[m].hiddenAt = .now
+                Task { try? await Cloud.shared.hide(momentID, at: .now) }
             }
         }
     }
@@ -189,6 +193,80 @@ final class RollStore {
             try? FileManager.default.removeItem(at: Self.mediaFolder.appending(path: file))
         }
         try? FileManager.default.removeItem(at: Self.mediaFolder.appending(path: Self.thumbName(moment.id)))
+        if let rollID = activeRoll?.id {
+            let paths = [moment.mediaFile, Self.thumbName(moment.id)].compactMap { $0 }.map { "\(rollID)/\($0)" }
+            Task { try? await Cloud.shared.takeBack(moment.id, paths: paths) }
+        }
+    }
+
+    // MARK: Cloud
+
+    /// Moments sealed on this phone that haven't reached the group yet.
+    @ObservationIgnored private var unsent: Set<UUID> {
+        get { Set((UserDefaults.standard.stringArray(forKey: "cloud.unsent") ?? []).compactMap(UUID.init)) }
+        set { UserDefaults.standard.set(newValue.map(\.uuidString), forKey: "cloud.unsent") }
+    }
+    @ObservationIgnored private var syncing = false
+
+    private func upload(_ moment: Moment, rollID: UUID) {
+        unsent.insert(moment.id)
+        Task { await send(moment, rollID: rollID) }
+    }
+
+    private func send(_ moment: Moment, rollID: UUID) async {
+        let remote = Cloud.RemoteMoment(id: moment.id, roll_id: rollID, author: moment.author, kind: moment.kind.rawValue,
+                                        caption: moment.caption, body: moment.text, media_path: nil, thumb_path: nil,
+                                        created_at: moment.createdAt, hidden_at: moment.hiddenAt)
+        let thumb = Self.mediaFolder.appending(path: Self.thumbName(moment.id))
+        do {
+            try await Cloud.shared.push(remote, media: mediaURL(moment),
+                                        thumb: FileManager.default.fileExists(atPath: thumb.path) ? thumb : nil)
+            unsent.remove(moment.id)
+        } catch {
+            print("cloud push failed:", error.localizedDescription)
+        }
+    }
+
+    /// Bring every group up to date: join it, send anything unsent, pull friends' moments (still sealed).
+    func syncWithCloud() async {
+        guard !syncing, !state.me.isEmpty else { return }
+        syncing = true
+        defer { syncing = false }
+        for roll in state.rolls {
+            do {
+                try await Cloud.shared.ensure(rollID: roll.id, name: roll.name, revealDate: roll.revealDate, me: state.me)
+                for m in roll.moments where m.author == state.me && unsent.contains(m.id) { await send(m, rollID: roll.id) }
+                let names = try await Cloud.shared.members(roll.id)
+                let remote = try await Cloud.shared.moments(roll.id)
+                var downloaded: [Moment] = []
+                for r in remote where !roll.moments.contains(where: { $0.id == r.id }) {
+                    var m = Moment(id: r.id, author: r.author, kind: MomentKind(rawValue: r.kind) ?? .note, caption: r.caption, text: r.body)
+                    m.createdAt = r.created_at
+                    m.hiddenAt = r.hidden_at
+                    if let path = r.media_path, let data = try? await Cloud.shared.download(path) {
+                        let name = (path as NSString).lastPathComponent
+                        try? data.write(to: Self.mediaFolder.appending(path: name))
+                        m.mediaFile = name
+                    }
+                    if let path = r.thumb_path, let data = try? await Cloud.shared.download(path) {
+                        try? data.write(to: Self.mediaFolder.appending(path: Self.thumbName(r.id)))
+                    }
+                    downloaded.append(m)
+                }
+                guard let i = state.rolls.firstIndex(where: { $0.id == roll.id }) else { continue }
+                var updated = state.rolls[i]
+                for name in names where !updated.members.contains(name) { updated.members.append(name) }
+                updated.moments.append(contentsOf: downloaded.filter { d in !updated.moments.contains { $0.id == d.id } })
+                for r in remote {
+                    if let k = updated.moments.firstIndex(where: { $0.id == r.id }), updated.moments[k].hiddenAt == nil, let h = r.hidden_at {
+                        updated.moments[k].hiddenAt = h
+                    }
+                }
+                if updated != state.rolls[i] { state.rolls[i] = updated }
+            } catch {
+                print("cloud sync failed for \(roll.name):", error.localizedDescription)
+            }
+        }
     }
 
     var myTakeBacks: [Moment] {
