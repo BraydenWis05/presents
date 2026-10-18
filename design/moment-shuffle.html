@@ -1,0 +1,757 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Moment Shuffle</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+/* Layout: one phone prototype centered on a dark stage, a quiet control panel beside it (stacks below on phones) */
+:root {
+  --page: #06090a;
+  --ink: #0b1316;
+  --fg: #eef3f2;
+  --muted: #8b9c9f;
+  --line: #1c272b;
+  --pill: #f6f7f4;
+  --pill-ink: #0b1316;
+  --bezel: #2b3446;
+  --video: #E2642E; --doodle: #BCD3DC; --photo: #D257B4; --voice: #1A86A6; --note: #E5D24A;
+  --serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--fg);
+  font-family: var(--sans);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--fg); outline-offset: 3px; }
+
+.stage {
+  min-height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 56px;
+  padding-block: 24px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* ---------- phone ---------- */
+.phone {
+  --h: min(844px, calc(100dvh - 48px));
+  height: var(--h);
+  width: calc(var(--h) * 0.462);
+  max-width: calc(100vw - 32px);
+  flex: none;
+  box-sizing: border-box;
+  padding: calc(var(--h) * 0.012);
+  border-radius: calc(var(--h) * 0.075);
+  background: linear-gradient(140deg, #4a5468, var(--bezel) 30%, #1b212c 70%, #3b4558);
+  box-shadow: 0 0 0 1px #0d1117, 0 40px 80px -30px #000;
+}
+.screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: calc(var(--h) * 0.064);
+  /* matched to the Figma frame: a top-to-bottom teal-to-ink gradient */
+  background: linear-gradient(180deg, #0B1B21 0%, #0A171C 35%, #0A1518 50%, #0A1215 80%, #0A1012 100%);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  container-type: size;
+  isolation: isolate;
+}
+.grain {
+  /* per-pixel film grain over the whole frame (blobs, text and result included) */
+  position: absolute; inset: 0; pointer-events: none; z-index: 9;
+  background-image: var(--grain, none);
+  background-size: 256px 256px;
+  mix-blend-mode: soft-light;
+}
+
+/* blobs */
+#blobs { position: absolute; inset: 0; z-index: 1; }
+.blob { position: absolute; left: 0; top: 0; pointer-events: none; will-change: transform, opacity; }
+.glow {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: radial-gradient(circle, var(--c) 0%, color-mix(in srgb, var(--c) 72%, transparent) 26%, transparent 66%);
+  filter: blur(calc(var(--blur, 14) * 1px));
+}
+.blob svg {
+  position: absolute; left: 50%; top: 50%;
+  width: 17%; height: 17%;
+  transform: translate(-50%, -50%);
+  fill: none; stroke: #fff; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
+  opacity: var(--io, 1);
+  filter: drop-shadow(0 0 6px rgba(0,0,0,.25));
+}
+.hit { position: absolute; left: 30%; top: 30%; width: 40%; height: 40%; border-radius: 50%; pointer-events: auto; cursor: grab; }
+.screen:not([data-state="idle"]) .hit, .screen[data-variant="pulse"] .hit { pointer-events: none; }
+
+/* home elements (fade away once a shuffle starts) */
+.home-only { transition: opacity .45s ease, filter .45s ease, translate .5s cubic-bezier(.2,.8,.2,1); }
+.screen:not([data-state="idle"]):not([data-state="charging"]) .home-only { opacity: 0; filter: blur(6px); translate: 0 8px; pointer-events: none; }
+
+.logo {
+  position: absolute; z-index: 4; left: 50%; top: 9.5%;
+  transform: translateX(-50%);
+  display: flex; align-items: center; gap: 2.2cqw;
+  pointer-events: none;
+}
+.mark {
+  --m: 7cqw;
+  width: var(--m); height: var(--m); flex: none;
+  background:
+    radial-gradient(circle at 50% 17%, var(--video) 0 14%, transparent 22%),
+    radial-gradient(circle at 83% 41%, var(--photo) 0 14%, transparent 22%),
+    radial-gradient(circle at 70% 79%, var(--note) 0 14%, transparent 22%),
+    radial-gradient(circle at 30% 79%, var(--voice) 0 14%, transparent 22%),
+    radial-gradient(circle at 17% 41%, var(--doodle) 0 14%, transparent 22%);
+}
+.mark.mono {
+  background:
+    radial-gradient(circle at 50% 17%, #fff 0 13%, transparent 20%),
+    radial-gradient(circle at 83% 41%, #fff 0 13%, transparent 20%),
+    radial-gradient(circle at 70% 79%, #fff 0 13%, transparent 20%),
+    radial-gradient(circle at 30% 79%, #fff 0 13%, transparent 20%),
+    radial-gradient(circle at 17% 41%, #fff 0 13%, transparent 20%);
+}
+.wordmark { font-size: 3.2cqw; letter-spacing: .3em; text-transform: uppercase; color: rgba(255,255,255,.82); padding-left: .3em; }
+.kicker { display: none; }
+
+.center {
+  position: absolute; left: 0; right: 0; top: 44.5%;
+  z-index: 4; pointer-events: none;
+  font-family: var(--serif); font-style: italic;
+  font-size: 8cqw; line-height: 1;
+  text-align: center;
+  color: #f3f5f2;
+}
+.center br { display: none; }
+.shuffling {
+  position: absolute; left: 0; right: 0; top: 44.5%;
+  z-index: 4; pointer-events: none;
+  font-family: var(--serif); font-style: italic; font-size: 8cqw; line-height: 1; text-align: center;
+  opacity: 0; transform: translateY(10px); filter: blur(6px);
+  transition: opacity .5s ease, transform .7s cubic-bezier(.2,.8,.2,1), filter .5s ease;
+}
+.screen[data-state="shuffle"] .shuffling { opacity: 1; transform: none; filter: none; transition-delay: .2s; }
+.dots span { display: inline-block; animation: dot 1.2s infinite ease-in-out; }
+.dots span:nth-child(2) { animation-delay: .15s; }
+.dots span:nth-child(3) { animation-delay: .3s; }
+@keyframes dot { 0%, 100% { opacity: .25; } 40% { opacity: 1; } }
+
+#shuffleBtn {
+  --charge: 0;
+  position: absolute; left: 50%; top: 53.5%;
+  z-index: 4;
+  transform: translateX(-50%) scale(calc(1 - var(--charge) * .08));
+  padding: 3.4cqw 7.6cqw;
+  border: 0; border-radius: 999px;
+  background: var(--pill); color: var(--pill-ink);
+  font-size: 4.6cqw; font-weight: 450; letter-spacing: .01em;
+  box-shadow: 0 0 calc(var(--charge) * 44px) calc(var(--charge) * 8px) rgba(255,255,255,.28), 0 8px 24px -10px rgba(0,0,0,.6);
+  touch-action: none;
+  white-space: nowrap;
+}
+#skipBtn {
+  position: absolute; left: 50%; bottom: 9.5%;
+  transform: translateX(-50%);
+  z-index: 4;
+  border: 0; background: none; padding: 10px 16px;
+  font-size: 3.7cqw; color: rgba(255,255,255,.82);
+  opacity: 0; pointer-events: none;
+  transition: opacity .4s .3s;
+}
+.screen[data-state="shuffle"] #skipBtn { opacity: 1; pointer-events: auto; }
+
+.orbit-ring, .ripples { display: none; }
+
+/* ---- variant: orbit ---- */
+.screen[data-variant="orbit"] .logo { top: 37%; }
+.screen[data-variant="orbit"] .mark { --m: 17cqw; }
+.screen[data-variant="orbit"] .wordmark { display: none; }
+.screen[data-variant="orbit"] .center { top: 50%; font-size: 7.4cqw; }
+.screen[data-variant="orbit"] #shuffleBtn { top: 57%; }
+.screen[data-variant="orbit"] .orbit-ring {
+  display: block; position: absolute; z-index: 0; pointer-events: none;
+  left: 8%; width: 84%; top: 15%; height: 64%;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.07);
+}
+
+/* ---- variant: headline ---- */
+.screen[data-variant="headline"] .logo { left: 8%; transform: none; }
+.screen[data-variant="headline"] .kicker {
+  display: block; position: absolute; z-index: 4; left: 8%; top: 18%;
+  font-size: 3.3cqw; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.6);
+}
+.screen[data-variant="headline"] .center { left: 8%; right: 8%; top: 22.5%; text-align: left; font-size: 17cqw; line-height: .92; letter-spacing: -.01em; }
+.screen[data-variant="headline"] .center br { display: inline; }
+.screen[data-variant="headline"] #shuffleBtn { top: auto; bottom: 10%; left: 8%; transform: scale(calc(1 - var(--charge) * .08)); transform-origin: left center; padding: 3.8cqw 9cqw; }
+
+/* ---- variant: pulse ---- */
+.screen[data-variant="pulse"] .logo { top: 45%; transform: translate(-50%, -50%); }
+.screen[data-variant="pulse"] .mark { --m: 15cqw; }
+.screen[data-variant="pulse"] .wordmark { display: none; }
+.screen[data-variant="pulse"] .center { top: 66%; font-size: 7.4cqw; }
+.screen[data-variant="pulse"] #shuffleBtn { top: 73.5%; }
+.screen[data-variant="pulse"] .ripples { display: block; position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.ripples i {
+  position: absolute; left: 50%; top: 45%;
+  width: 40cqw; height: 40cqw; margin: -20cqw 0 0 -20cqw;
+  border-radius: 50%; border: 1px solid rgba(255,255,255,.35);
+  opacity: 0;
+  animation: ripple 3.6s cubic-bezier(.2,.6,.3,1) infinite;
+}
+.ripples i:nth-child(2) { animation-delay: 1.2s; }
+.ripples i:nth-child(3) { animation-delay: 2.4s; }
+@keyframes ripple { 0% { transform: scale(.5); opacity: .5; } 100% { transform: scale(2.3); opacity: 0; } }
+
+/* ---------- result ---------- */
+.result { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
+.result > * { position: absolute; left: 0; right: 0; text-align: center; opacity: 0; transform: translateY(12px); transition: opacity .55s ease, transform .8s cubic-bezier(.2,.8,.2,1); }
+.result.show { pointer-events: auto; }
+.result.show > * { opacity: 1; transform: none; }
+.result.show .rs-title { transition-delay: .1s; }
+.result.show .rs-prompt { transition-delay: .35s; }
+.result.show .rs-actions { transition-delay: .5s; }
+.rs-title { top: 24.3%; margin: 0; transform-origin: center; translate: 0 -50%; font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 9.6cqw; line-height: 1; letter-spacing: -.01em; }
+.rs-icon { top: 41%; left: 50%; right: auto; width: 42cqw; height: 42cqw; translate: -50% -50%; transform: scale(.4); }
+.result.show .rs-icon { transform: scale(1); transition: opacity .5s ease .05s, transform .9s cubic-bezier(.2,.9,.25,1.15); }
+.rs-icon svg { width: 100%; height: 100%; fill: none; stroke: #fff; stroke-width: 1.15; stroke-linecap: round; stroke-linejoin: round; }
+.rs-prompt { top: 59.4%; margin: 0; translate: 0 -50%; padding: 0 10%; font-size: 4.3cqw; line-height: 1.35; color: rgba(255,255,255,.9); text-wrap: balance; }
+.rs-actions { top: 77.4%; translate: 0 -50%; display: flex; align-items: center; justify-content: center; gap: 11cqw; }
+.pill { border: 0; border-radius: 999px; background: var(--pill); color: var(--pill-ink); padding: 3.4cqw 6.6cqw; font-size: 4.8cqw; font-weight: 450; }
+.reroll { border: 0; background: none; display: inline-flex; align-items: center; gap: 3cqw; padding: 8px 4px; font-size: 4.8cqw; color: #fff; }
+.reroll svg { width: 6cqw; height: 6cqw; fill: none; stroke: #fff; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; transition: transform .5s cubic-bezier(.3,.7,.3,1); }
+.reroll:hover svg, .reroll:active svg { transform: rotate(-180deg); }
+
+.toast {
+  position: absolute; left: 50%; bottom: 10%; z-index: 8;
+  transform: translate(-50%, 10px);
+  padding: 10px 16px; border-radius: 999px;
+  background: rgba(10,16,18,.86); color: var(--fg);
+  font-size: 3.4cqw; white-space: nowrap;
+  opacity: 0; pointer-events: none;
+  transition: opacity .3s, transform .3s;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* device chrome */
+.status {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 10;
+  height: 6.6%;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 9% 0 13%;
+  font-size: 4cqw; font-weight: 600;
+  pointer-events: none;
+}
+.status svg { height: 3.2cqw; fill: #fff; }
+.status .icons { display: flex; gap: 1.4cqw; align-items: center; }
+.island { position: absolute; z-index: 11; top: 1.4%; left: 50%; transform: translateX(-50%); width: 31%; height: 4.3%; border-radius: 999px; background: #000; pointer-events: none; }
+.homebar { position: absolute; z-index: 11; bottom: 0.9%; left: 50%; transform: translateX(-50%); width: 36%; height: 5px; border-radius: 999px; background: #fff; pointer-events: none; }
+
+/* ---------- panel ---------- */
+.panel { width: 300px; max-width: 100%; display: flex; flex-direction: column; gap: 28px; }
+.panel h1 { margin: 0 0 6px; font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 36px; line-height: 1; }
+.panel p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.group { display: flex; flex-direction: column; gap: 10px; }
+.label { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.seg { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 12px; }
+.seg button { border: 0; border-radius: 8px; padding: 9px 4px; background: none; color: var(--muted); font-size: 13px; }
+.seg button[aria-pressed="true"] { background: var(--fg); color: var(--page); }
+.seg-note { font-size: 13px; color: var(--muted); min-height: 2.8em; line-height: 1.4; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px; }
+input[type="range"] { flex: 1; accent-color: var(--fg); }
+.speed-val { font-variant-numeric: tabular-nums; color: var(--muted); width: 3.5ch; text-align: right; }
+select { background: var(--ink); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; font: inherit; font-size: 13px; }
+.tips { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; color: var(--fg); }
+.tips li { display: flex; gap: 10px; line-height: 1.4; }
+.tips li::before { content: ""; flex: none; width: 6px; height: 6px; margin-top: .5em; border-radius: 50%; background: var(--muted); }
+.switch { position: relative; width: 38px; height: 22px; flex: none; }
+.switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.switch span { position: absolute; inset: 0; border-radius: 999px; background: var(--line); transition: background .2s; pointer-events: none; }
+.switch span::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--muted); transition: transform .2s, background .2s; }
+.switch input:checked + span { background: var(--fg); }
+.switch input:checked + span::after { transform: translateX(16px); background: var(--page); }
+.text-btn { align-self: flex-start; border: 1px solid var(--line); background: none; border-radius: 8px; padding: 7px 12px; font-size: 13px; color: var(--fg); }
+
+@media (max-width: 720px) {
+  .stage { flex-direction: column; gap: 0; padding: 0; }
+  .phone { --h: 100dvh; width: 100%; max-width: none; padding: 0; border-radius: 0; background: none; box-shadow: none; }
+  .screen { border-radius: 0; }
+  .status, .island, .homebar { display: none; }
+  .panel { width: auto; box-sizing: border-box; align-self: stretch; padding-block: 32px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dots span, .ripples i { animation: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="phone">
+    <div class="screen" id="screen" data-state="idle" data-variant="pulse">
+      <div class="orbit-ring home-only"></div>
+      <div id="blobs"></div>
+      <div class="ripples home-only"><i></i><i></i><i></i></div>
+
+      <div class="logo home-only" aria-label="Logo placeholder"><span class="mark" id="mark"></span><span class="wordmark">logo</span></div>
+      <div class="kicker home-only" id="kicker"></div>
+      <div class="center home-only">capture<br> a moment</div>
+      <div class="shuffling" aria-live="polite">shuffling<span class="dots"><span>.</span><span>.</span><span>.</span></span></div>
+      <button id="shuffleBtn" class="home-only" type="button">Shuffle</button>
+      <button id="skipBtn" type="button">Skip →</button>
+
+      <div class="result" id="result" aria-hidden="true">
+        <h2 class="rs-title" id="rsTitle">Voice Note</h2>
+        <div class="rs-icon" id="rsIcon"></div>
+        <p class="rs-prompt" id="rsPrompt">Say the thing out loud</p>
+        <div class="rs-actions">
+          <button class="reroll" id="rsReroll" type="button"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.6-4.4L4 8.5"/><path d="M4 3.5v5h5"/><path d="M4 13a8 8 0 0 0 14.6 4.4l1.4-1.9"/><path d="M20 20.5v-5h-5"/></svg>Reroll</button>
+          <button class="pill" id="rsGo" type="button">Let’s go</button>
+        </div>
+      </div>
+
+      <div class="grain"></div>
+      <div class="toast" id="toast"></div>
+
+      <div class="status">
+        <span>4:20</span>
+        <span class="icons">
+          <svg viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+          <svg viewBox="0 0 16 12"><path d="M8 2.2c2.4 0 4.6.9 6.2 2.5l1.2-1.3A10.4 10.4 0 0 0 8 .4 10.4 10.4 0 0 0 .6 3.4l1.2 1.3A8.7 8.7 0 0 1 8 2.2Zm0 3.6c1.4 0 2.7.5 3.7 1.4l1.2-1.3A7.2 7.2 0 0 0 8 4a7.2 7.2 0 0 0-4.9 1.9l1.2 1.3c1-.9 2.3-1.4 3.7-1.4Zm0 3.5a2 2 0 0 0-1.3.5L8 11.6l1.3-1.8A2 2 0 0 0 8 9.3Z"/></svg>
+          <svg viewBox="0 0 27 12"><rect x=".5" y=".5" width="23" height="11" rx="3.2" fill="none" stroke="#fff" stroke-opacity=".5"/><rect x="2" y="2" width="20" height="8" rx="2"/><path d="M25 4v4c.8-.3 1.3-1.1 1.3-2S25.8 4.3 25 4Z" fill-opacity=".5"/></svg>
+        </span>
+      </div>
+      <div class="island"></div>
+      <div class="homebar"></div>
+    </div>
+  </div>
+
+  <aside class="panel">
+    <div>
+      <h1>Moment Shuffle</h1>
+      <p>Tap Shuffle and the five moments spin into a vortex. One gets picked and becomes your prompt.</p>
+    </div>
+
+    <div class="group">
+      <span class="label">Home screen</span>
+      <div class="seg" id="variantSeg" role="group" aria-label="Home screen version">
+        <button type="button" data-variant="classic" aria-pressed="false">Classic</button>
+        <button type="button" data-variant="orbit" aria-pressed="false">Orbit</button>
+        <button type="button" data-variant="headline" aria-pressed="false">Headline</button>
+        <button type="button" data-variant="pulse" aria-pressed="true">Pulse</button>
+      </div>
+      <div class="seg-note" id="variantNote"></div>
+      <p>The five-dot mark is a stand-in for your logo.</p>
+    </div>
+
+    <div class="group">
+      <span class="label">Tuning</span>
+      <label class="row" for="speed">Speed <input id="speed" type="range" min="0.5" max="2" step="0.1" value="1"><span class="speed-val" id="speedVal">1.0×</span></label>
+      <div class="row"><label for="sound">Sound and haptics</label><span class="switch"><input id="sound" type="checkbox" checked><span></span></span></div>
+      <label class="row" for="rig">Result <select id="rig">
+        <option value="random">Random</option>
+        <option value="0">Video</option>
+        <option value="1">Doodle</option>
+        <option value="2">Photo</option>
+        <option value="3">Voice Note</option>
+        <option value="4">Note</option>
+      </select></label>
+      <button class="text-btn" id="resetBtn" type="button">Back to home screen</button>
+    </div>
+
+    <div class="group">
+      <span class="label">Things to try</span>
+      <ul class="tips">
+        <li>Tap Shuffle.</li>
+        <li>Press and hold Shuffle to wind it up, then let go for a faster spin.</li>
+        <li>Drag or fling a blob. It drifts back home.</li>
+        <li>Tap a blob to pick that moment yourself.</li>
+        <li>Hit Reroll on the result to spin again.</li>
+      </ul>
+    </div>
+  </aside>
+</div>
+
+<script>
+(() => {
+  const TYPES = [
+    { id: 'video', color: '#E2642E', home: [.57, .2], hl: [.72, .52], title: 'Video', cta: 'camera',
+      prompts: ['Show us what’s in front of you', 'Ten seconds, no edits', 'Pan slowly across the room'],
+      icon: '<rect x="2.5" y="6.5" width="13" height="11" rx="2"/><path d="M15.5 10.5 21.5 7v10l-6-3.5"/>' },
+    { id: 'doodle', color: '#BCD3DC', home: [.07, .335], hl: [.2, .57], title: 'Doodle', cta: 'canvas',
+      prompts: ['Draw it badly, on purpose', 'Sketch the view from where you are', 'Doodle what you had for lunch'],
+      icon: '<path d="M4 20l1.2-4.2L16.6 4.4a2 2 0 0 1 2.9 0l.1.1a2 2 0 0 1 0 2.9L8.2 18.8 4 20Z"/><path d="m14.5 6.5 3 3"/>' },
+    { id: 'photo', color: '#D257B4', home: [.96, .41], hl: [.92, .67], title: 'Photo', cta: 'camera',
+      prompts: ['Catch what caught your eye', 'Something blue, close by', 'The light where you are right now'],
+      icon: '<path d="M3 8.5h3.8L8.6 6h6.8l1.8 2.5H21V19H3Z"/><circle cx="12" cy="13.2" r="3.4"/>' },
+    { id: 'voice', color: '#1A86A6', home: [.2, .735], hl: [.34, .74], title: 'Voice Note', cta: 'recorder',
+      prompts: ['Say the thing out loud', 'Hum the song stuck in your head', 'Tell someone about your morning'],
+      icon: '<path d="M3 10.4v3.2M6.6 7v10M10.2 4v16M13.8 8.7v6.6M17.4 6.2v11.6M21 10.4v3.2"/>' },
+    { id: 'note', color: '#E5D24A', home: [.93, .8], hl: [.68, .76], title: 'Note', cta: 'editor',
+      prompts: ['Write the one line you’d forget', 'Something you overheard today', 'What you’d tell yourself a year ago'],
+      icon: '<path d="M4 7h16M4 12h16M10 17h10"/>' },
+  ];
+  const VARIANT_NOTES = {
+    classic: 'Your original layout, with the logo at the top.',
+    orbit: 'The logo sits in the middle and the five moments slowly circle it.',
+    headline: 'Big type and today’s date up top. The colors pool at the bottom.',
+    pulse: 'All five colors merge into one breathing glow behind the logo.',
+  };
+
+  const $ = (s) => document.querySelector(s);
+  const screen = $('#screen'), layer = $('#blobs'), btn = $('#shuffleBtn'), result = $('#result'), toast = $('#toast');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const cfg = { variant: 'pulse', speed: 1, sound: true, rig: 'random' };
+  let W = 0, H = 0, SIZE = 0;
+
+  // Monochrome grain tile: grey noise centered on 50% so the soft-light blend
+  // speckles light and dark evenly without shifting the gradient underneath.
+  (function makeGrain() {
+    const dpr = Math.min(3, window.devicePixelRatio || 1), n = Math.round(256 * dpr);
+    const c = document.createElement('canvas'); c.width = c.height = n;
+    const ctx = c.getContext('2d'), img = ctx.createImageData(n, n), d = img.data;
+    for (let k = 0; k < d.length; k += 4) {
+      const g = (Math.random() + Math.random() + Math.random() - 1.5) * 2; // ~N(0, 1)
+      const v = Math.max(0, Math.min(255, 128 + g * 22));
+      d[k] = d[k + 1] = d[k + 2] = v; d[k + 3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+    try { screen.style.setProperty('--grain', `url(${c.toDataURL('image/png')})`); } catch (e) {}
+  })();
+
+  $('#kicker').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+  const blobs = TYPES.map((type, i) => {
+    const el = document.createElement('div');
+    el.className = 'blob';
+    el.style.setProperty('--c', type.color);
+    el.innerHTML = `<div class="glow"></div><svg viewBox="0 0 24 24">${type.icon}</svg><div class="hit" aria-label="${type.title}"></div>`;
+    layer.appendChild(el);
+    return { i, type, el, x: 0, y: 0, vx: 0, vy: 0, s: 1, o: 1, blur: 14, io: 1, ph: Math.random() * 6.28, ang: 0, r0: 0 };
+  });
+
+  function measure() {
+    const r = screen.getBoundingClientRect();
+    const first = W === 0;
+    W = r.width; H = r.height;
+    SIZE = Math.max(140, W * 0.5);
+    blobs.forEach((b) => {
+      b.el.style.width = b.el.style.height = SIZE + 'px';
+      if (first) { b.x = b.type.home[0] * W; b.y = b.type.home[1] * H; }
+    });
+  }
+  const cx = () => W / 2, cy = () => H * 0.47;
+
+  // ---------- sound + haptics ----------
+  let ac = null;
+  function audio() {
+    if (!cfg.sound) return null;
+    try {
+      if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
+      if (ac.state === 'suspended') ac.resume();
+    } catch (e) { return null; }
+    return ac;
+  }
+  function tick(freq = 1200, vol = 0.06) {
+    const a = audio(); if (!a) return;
+    const o = a.createOscillator(), g = a.createGain(), t0 = a.currentTime;
+    o.type = 'triangle'; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.07);
+    o.connect(g).connect(a.destination); o.start(t0); o.stop(t0 + 0.08);
+  }
+  function chime() {
+    const a = audio(); if (!a) return;
+    [523.25, 783.99, 1046.5].forEach((f, k) => {
+      const o = a.createOscillator(), g = a.createGain(), t0 = a.currentTime + k * 0.09;
+      o.type = 'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.07, t0 + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.9);
+      o.connect(g).connect(a.destination); o.start(t0); o.stop(t0 + 1);
+    });
+  }
+  function buzz(p) { if (!cfg.sound) return; try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} }
+
+  // ---------- state ----------
+  let mode = 'idle', modeT = 0, charge = 0, intensity = 1, winner = 0, lastWinner = -1;
+  let spin = 0, spinAcc = 0, shown = false;
+  const pointer = { x: 0, y: 0, active: false };
+  let drag = null;
+
+  function setUI(state) {
+    screen.dataset.state = state;
+    btn.textContent = state === 'charging' && charge > 0.12 ? 'let go…' : 'Shuffle';
+  }
+
+  function pickWinner() {
+    if (cfg.rig !== 'random') return +cfg.rig;
+    let w;
+    do { w = Math.floor(Math.random() * TYPES.length); } while (w === lastWinner);
+    return w;
+  }
+
+  function hideResult() { result.classList.remove('show'); result.setAttribute('aria-hidden', 'true'); }
+
+  function startShuffle(power = 1) {
+    audio();
+    hideResult();
+    mode = 'shuffle'; modeT = 0; intensity = power; spin = 0; spinAcc = 0;
+    winner = pickWinner();
+    charge = 0; btn.style.setProperty('--charge', 0);
+    setUI('shuffle');
+    buzz(15);
+    blobs.forEach((b) => {
+      // blobs that flew off after the last pick come back in from the edges
+      if (b.o < 0.2) {
+        const a = Math.random() * Math.PI * 2;
+        b.x = cx() + Math.cos(a) * W * 0.8; b.y = cy() + Math.sin(a) * W * 0.8;
+      }
+      b.ang = Math.atan2(b.y - cy(), b.x - cx());
+      b.r0 = Math.hypot(b.x - cx(), b.y - cy());
+    });
+  }
+
+  function enterLand(w) {
+    mode = 'land'; modeT = 0; winner = w; lastWinner = w; shown = false;
+    setUI('land');
+    tick(1600, 0.07); buzz([10, 40, 20]);
+    blobs.forEach((b) => { b.vx *= 0.3; b.vy *= 0.3; });
+  }
+
+  function showResult() {
+    shown = true;
+    const t = TYPES[winner];
+    $('#rsTitle').textContent = t.title;
+    $('#rsIcon').innerHTML = `<svg viewBox="0 0 24 24">${t.icon}</svg>`;
+    $('#rsPrompt').textContent = t.prompts[Math.floor(Math.random() * t.prompts.length)];
+    result.setAttribute('aria-hidden', 'false');
+    result.classList.add('show');
+    chime();
+  }
+
+  function goHome() { hideResult(); mode = 'idle'; setUI('idle'); }
+
+  // ---------- physics helpers ----------
+  function spring(b, tx, ty, k, dt) {
+    const c = 2 * Math.sqrt(k) * 0.72;
+    for (let n = 0; n < 2; n++) {
+      const h = dt / 2;
+      b.vx += (k * (tx - b.x) - c * b.vx) * h;
+      b.vy += (k * (ty - b.y) - c * b.vy) * h;
+      b.x += b.vx * h; b.y += b.vy * h;
+    }
+  }
+  function ease(b, ts, to, blur, io, dt, rate = 7) {
+    const f = 1 - Math.exp(-dt * rate);
+    b.s += (ts - b.s) * f; b.o += (to - b.o) * f; b.blur += (blur - b.blur) * f; b.io += (io - b.io) * f;
+  }
+  const clamp = (v, a, z) => Math.max(a, Math.min(z, v));
+  const lerp = (a, z, t) => a + (z - a) * t;
+  const easeInOut = (t) => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+  const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+
+  // where each blob rests on the home screen, per variant
+  function homeFor(b, t) {
+    const v = cfg.variant, i = b.i, slot = -Math.PI / 2 + i * Math.PI * 2 / 5;
+    if (v === 'orbit') {
+      const a = slot + (reduced ? 0 : t * 0.12);
+      return { x: cx() + Math.cos(a) * W * 0.42, y: cy() + Math.sin(a) * H * 0.32, s: 1, io: 1 };
+    }
+    if (v === 'pulse') {
+      const a = slot + (reduced ? 0 : t * 0.25), r = W * (0.1 + 0.03 * Math.sin(t * 1.3 + i));
+      return { x: cx() + Math.cos(a) * r, y: H * 0.45 + Math.sin(a) * r, s: 1.12 + (reduced ? 0 : 0.1 * Math.sin(t * (Math.PI * 2 / 3.6))), io: 0 };
+    }
+    const h = v === 'headline' ? b.type.hl : b.type.home;
+    let x = h[0] * W, y = h[1] * H;
+    if (!reduced) { x += Math.sin(t * 0.35 + b.ph) * W * 0.035; y += Math.cos(t * 0.27 + b.ph * 1.3) * H * 0.018; }
+    return { x, y, s: 1, io: 1 };
+  }
+
+  // ---------- modes ----------
+  let clock = 0;
+  function updateIdle(dt) {
+    if (mode === 'charging') {
+      charge = Math.min(1, charge + dt / 1.1);
+      btn.style.setProperty('--charge', charge.toFixed(3));
+      if (charge > 0.12 && btn.textContent !== 'let go…') btn.textContent = 'let go…';
+      if (Math.random() < charge * 0.15) tick(300 + charge * 500, 0.02);
+    }
+    blobs.forEach((b) => {
+      if (drag && drag.b === b) { ease(b, 1.08, 1, 14, 1, dt); return; }
+      const h = homeFor(b, clock);
+      let hx = h.x, hy = h.y;
+      if (mode === 'charging') {
+        hx += (cx() - hx) * charge * 0.42 + (Math.random() - .5) * charge * 14;
+        hy += (cy() - hy) * charge * 0.42 + (Math.random() - .5) * charge * 14;
+      }
+      if (pointer.active && !drag && cfg.variant !== 'pulse') {
+        const dx = b.x - pointer.x, dy = b.y - pointer.y, d = Math.hypot(dx, dy) || 1, R = W * 0.42;
+        if (d < R) { const p = Math.pow(1 - d / R, 2) * W * 0.2; hx += dx / d * p; hy += dy / d * p; }
+      }
+      spring(b, hx, hy, 26, dt);
+      ease(b, h.s - charge * 0.12, 1, 14 + charge * 6, h.io, dt, 4);
+    });
+  }
+
+  function updateVortex(dt, sdt) {
+    const T = modeT, I = intensity, top = 8 * I;
+    const w = T < 0.8 ? lerp(0, top, easeInOut(T / 0.8)) : T < 1.5 ? top : lerp(top, 0.4, easeOut(clamp((T - 1.5) / 1.1, 0, 1)));
+    spin += w * sdt;
+    // roulette-style clicker: one tick each time the ring turns one slot
+    spinAcc += w * sdt;
+    const step = Math.PI * 2 / 5;
+    while (spinAcc >= step) { spinAcc -= step; tick(900 + w * 45, 0.05); buzz(4); }
+    const inner = W * 0.12, outer = W * 0.3;
+    blobs.forEach((b, i) => {
+      const slot = -Math.PI / 2 + i * step;
+      let delta = slot - b.ang; delta = Math.atan2(Math.sin(delta), Math.cos(delta));
+      const e = easeInOut(clamp(T / 0.8, 0, 1));
+      const r = T < 0.8 ? lerp(b.r0, inner, e) : T < 1.5 ? inner + Math.sin(T * 14 + i) * 5 : lerp(inner, outer, easeOut(clamp((T - 1.5) / 1.1, 0, 1)));
+      const a = b.ang + delta * e + spin;
+      spring(b, cx() + Math.cos(a) * r, cy() + Math.sin(a) * r, 240, dt);
+      const lit = b.i === winner && T > 1.9;
+      ease(b, lit ? 0.9 : 0.62, lit ? 1 : 0.55, 22, 0, dt);
+    });
+    if (T >= 2.7) enterLand(winner);
+  }
+
+  // the picked blob drifts to the middle, grows and goes soft; the rest drift off
+  function updateLand(dt) {
+    const T = modeT, breathe = reduced ? 0 : Math.sin(clock * 1.4) * 0.05;
+    blobs.forEach((b) => {
+      if (b.i === winner) {
+        spring(b, cx(), H * 0.41, 40, dt);
+        ease(b, 2.35 + breathe, 0.62, 40, 0, dt, 2.6);
+      } else {
+        const dx = b.x - cx(), dy = b.y - cy(), d = Math.hypot(dx, dy) || 1;
+        spring(b, cx() + dx / d * W * 0.95, cy() + dy / d * W * 0.95, 20, dt);
+        ease(b, 0.5, 0, 30, 0, dt, 4);
+      }
+    });
+    if (!shown && T > 0.35) showResult();
+    if (T > 1.6) mode = 'reveal';
+  }
+
+  function render() {
+    blobs.forEach((b) => {
+      b.el.style.transform = `translate3d(${(b.x - SIZE / 2).toFixed(1)}px, ${(b.y - SIZE / 2).toFixed(1)}px, 0) scale(${b.s.toFixed(3)})`;
+      b.el.style.opacity = b.o.toFixed(3);
+      b.el.style.setProperty('--blur', b.blur.toFixed(1));
+      b.el.style.setProperty('--io', b.io.toFixed(2));
+    });
+  }
+
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.033, (now - last) / 1000); last = now;
+    const sdt = dt * cfg.speed;
+    clock += dt;
+    if (mode === 'idle' || mode === 'charging') updateIdle(dt);
+    else if (mode === 'shuffle') { modeT += sdt; updateVortex(sdt, sdt); }
+    else if (mode === 'land') { modeT += sdt; updateLand(dt * Math.max(1, cfg.speed)); }
+    else if (mode === 'reveal') updateLand(dt);
+    render();
+    requestAnimationFrame(frame);
+  }
+
+  // ---------- input ----------
+  function local(e) { const r = screen.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+
+  screen.addEventListener('pointermove', (e) => { const p = local(e); pointer.x = p.x; pointer.y = p.y; pointer.active = e.pointerType === 'mouse' || !!drag; });
+  screen.addEventListener('pointerleave', () => { pointer.active = false; });
+
+  blobs.forEach((b) => {
+    const hit = b.el.querySelector('.hit');
+    hit.addEventListener('pointerdown', (e) => {
+      if (mode !== 'idle') return;
+      e.preventDefault();
+      const p = local(e), now = performance.now();
+      drag = { b, ox: p.x - b.x, oy: p.y - b.y, sx: p.x, sy: p.y, st: now, lx: p.x, ly: p.y, lt: now, vx: 0, vy: 0, moved: false };
+      b.vx = b.vy = 0;
+      hit.setPointerCapture(e.pointerId);
+      tick(700, 0.03);
+    });
+    hit.addEventListener('pointermove', (e) => {
+      if (!drag || drag.b !== b) return;
+      const p = local(e), now = performance.now(), dtp = Math.max(1, now - drag.lt) / 1000;
+      drag.vx = drag.vx * 0.6 + ((p.x - drag.lx) / dtp) * 0.4;
+      drag.vy = drag.vy * 0.6 + ((p.y - drag.ly) / dtp) * 0.4;
+      drag.lx = p.x; drag.ly = p.y; drag.lt = now;
+      if (Math.hypot(p.x - drag.sx, p.y - drag.sy) > 6) drag.moved = true;
+      b.x = p.x - drag.ox; b.y = p.y - drag.oy;
+    });
+    const end = (e) => {
+      if (!drag || drag.b !== b) return;
+      const tap = !drag.moved && performance.now() - drag.st < 350;
+      b.vx = clamp(drag.vx, -3000, 3000); b.vy = clamp(drag.vy, -3000, 3000);
+      drag = null;
+      if (tap && e.type === 'pointerup') { audio(); enterLand(b.i); }
+    };
+    hit.addEventListener('pointerup', end);
+    hit.addEventListener('pointercancel', end);
+  });
+
+  btn.addEventListener('pointerdown', (e) => {
+    if (mode !== 'idle') return;
+    audio();
+    mode = 'charging'; charge = 0; setUI('charging');
+    btn.setPointerCapture(e.pointerId);
+  });
+  btn.addEventListener('pointerup', () => { if (mode === 'charging') startShuffle(1 + charge); });
+  btn.addEventListener('pointercancel', () => { if (mode === 'charging') { mode = 'idle'; charge = 0; btn.style.setProperty('--charge', 0); setUI('idle'); } });
+  btn.addEventListener('click', (e) => { if (e.detail === 0 && mode === 'idle') startShuffle(1); });
+
+  $('#skipBtn').addEventListener('click', () => { if (mode === 'shuffle') enterLand(winner); });
+  $('#rsReroll').addEventListener('click', () => startShuffle(1));
+  let toastTimer;
+  $('#rsGo').addEventListener('click', () => {
+    toast.textContent = `The ${TYPES[winner].cta} opens next`;
+    toast.classList.add('show'); clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+  });
+
+  // ---------- panel ----------
+  const seg = $('#variantSeg');
+  function setVariant(v) {
+    cfg.variant = v;
+    screen.dataset.variant = v;
+    $('#mark').classList.toggle('mono', v === 'pulse');
+    seg.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.variant === v)));
+    $('#variantNote').textContent = VARIANT_NOTES[v];
+    if (mode !== 'idle') goHome();
+  }
+  seg.addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) setVariant(b.dataset.variant); });
+  $('#speed').addEventListener('input', (e) => { cfg.speed = +e.target.value; $('#speedVal').textContent = cfg.speed.toFixed(1) + '×'; });
+  $('#sound').addEventListener('change', (e) => { cfg.sound = e.target.checked; });
+  $('#rig').addEventListener('change', (e) => { cfg.rig = e.target.value; });
+  $('#resetBtn').addEventListener('click', goHome);
+
+  setVariant('pulse');
+  measure();
+  new ResizeObserver(measure).observe(screen);
+  setUI('idle');
+  render();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
