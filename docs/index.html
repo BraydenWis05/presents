@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="opening">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -513,13 +513,17 @@ body.ready .nav { opacity: 1; translate: -50% 0; pointer-events: auto; }
 .scrolly .anchor { position: absolute; left: 0; width: 1px; height: 1px; }
 .pin { position: sticky; top: 0; height: 100vh; height: 100dvh; overflow: hidden; }
 .orb { --s: min(46vmin, 380px); position: absolute; left: 50%; top: 50%; width: var(--s); height: var(--s); margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2); will-change: transform; display: grid; place-items: center; }
-.orb .orb-glow { position: absolute; inset: -12%; animation: orbspin 26s linear infinite; }
-.orb .orb-glow i { position: absolute; inset: 14%; border-radius: 50%; background: radial-gradient(circle, var(--c) 0%, color-mix(in srgb, var(--c) 50%, transparent) 30%, transparent 68%); opacity: .78; translate: var(--x) var(--y); animation: orbdrift 9s ease-in-out infinite alternate; animation-delay: var(--d); }
+.orb .orb-glow { position: absolute; inset: -12%; animation: orbspin 26s linear 1.8s infinite; }
+.orb .orb-glow i { position: absolute; inset: 14%; border-radius: 50%; background: radial-gradient(circle, var(--c) 0%, color-mix(in srgb, var(--c) 50%, transparent) 30%, transparent 68%); opacity: .78; translate: var(--x) var(--y); animation: orbgather 1.6s cubic-bezier(.3,.7,.2,1) var(--g) both, orbdrift 9s ease-in-out calc(1.9s + var(--d)) infinite alternate; }
+@keyframes orbgather { from { opacity: 0; translate: var(--sx) var(--sy); scale: .6; } 30% { opacity: .9; } to { opacity: .78; translate: var(--x) var(--y); scale: 1; } }
+.orb .core .mark b { opacity: 0; scale: 0; animation: dot .5s cubic-bezier(.3,1.4,.5,1) forwards; }
+.orb .core .word { opacity: 0; translate: 0 8px; animation: rise .8s 1.5s ease forwards; }
+.orb .core .sub { font-family: var(--serif); font-style: italic; color: var(--muted); font-size: calc(var(--s) * .055); opacity: 0; translate: 0 8px; animation: rise .8s 1.8s ease forwards; }
 @keyframes orbspin { to { rotate: 360deg; } }
 @keyframes orbdrift { from { translate: var(--x) var(--y); } to { translate: calc(var(--x) * -.6) calc(var(--y) * -.6); } }
+.orb .core .word, .orb .core .sub { display: block; }
 .orb .orb-glow, .orb .core { transition: opacity 1.2s ease, scale 1.4s cubic-bezier(.2,.8,.2,1); }
-body:not(.ready) .orb .orb-glow { opacity: 0; scale: .55; }
-body:not(.ready) .orb .core { opacity: 0; scale: .9; }
+html.opening, html.opening body { overflow: hidden; }
 body:not(.ready) .cue { opacity: 0 !important; }
 .orb .core { position: relative; display: grid; justify-items: center; gap: 10px; text-shadow: 0 0 30px rgba(6,12,14,.85), 0 0 8px rgba(6,12,14,.6); }
 .orb .core .mark { position: relative; inset: auto; margin: 0; width: calc(var(--s) * .16); height: calc(var(--s) * .16); }
@@ -564,22 +568,10 @@ body:not(.ready) .cue { opacity: 0 !important; }
 .made:hover { background: rgba(255,255,255,.06); }
 .foot { padding: 24px; text-align: center; font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); }
 .foot .mark { position: relative; inset: auto; display: inline-block; width: 14px; height: 14px; margin: 0 6px -2px 0; }
-@media (prefers-reduced-motion: reduce) { .orb .orb-glow, .orb .orb-glow i, .cue i { animation: none; } html { scroll-behavior: auto; } }
+@media (prefers-reduced-motion: reduce) { .orb .orb-glow, .orb .orb-glow i, .cue i { animation: none; } .orb .core .mark b, .orb .core .word, .orb .core .sub { animation: none; opacity: 1; scale: 1; translate: none; } html { scroll-behavior: auto; } }
 </style>
 
 <div class="grain"></div>
-<div class="intro" id="intro" aria-hidden="true">
-  <div class="intro-glow">
-    <i style="--c:var(--video);--x:-46vmin;--y:-30vmin"></i>
-    <i style="--c:var(--photo);--x:44vmin;--y:-26vmin"></i>
-    <i style="--c:var(--word);--x:-40vmin;--y:32vmin"></i>
-    <i style="--c:var(--voice);--x:42vmin;--y:30vmin"></i>
-    <i style="--c:var(--doodle);--x:0vmin;--y:-48vmin"></i>
-    <div class="mark" id="introMark"></div>
-  </div>
-  <b class="intro-word">Presents</b>
-  <span class="intro-sub">capture a moment, together</span>
-</div>
 
 <div class="scene-card" id="scene"></div>
 <div class="ending" id="ending">
@@ -623,11 +615,11 @@ body:not(.ready) .cue { opacity: 0 !important; }
   <div class="pin">
     <div class="orb" id="orb" aria-hidden="true">
       <div class="orb-glow">
-        <i style="--c:var(--video);--x:0%;--y:-14%;--d:0s"></i>
-        <i style="--c:var(--photo);--x:14%;--y:-4%;--d:-2s"></i>
-        <i style="--c:var(--word);--x:-14%;--y:-4%;--d:-4s"></i>
-        <i style="--c:var(--voice);--x:9%;--y:12%;--d:-6s"></i>
-        <i style="--c:var(--doodle);--x:-9%;--y:12%;--d:-8s"></i>
+        <i style="--c:var(--video);--x:0%;--y:-14%;--d:0s;--g:0s;--sx:-46vmin;--sy:-30vmin"></i>
+        <i style="--c:var(--photo);--x:14%;--y:-4%;--d:1.2s;--g:.08s;--sx:44vmin;--sy:-26vmin"></i>
+        <i style="--c:var(--word);--x:-14%;--y:-4%;--d:2.4s;--g:.16s;--sx:-40vmin;--sy:32vmin"></i>
+        <i style="--c:var(--voice);--x:9%;--y:12%;--d:3.6s;--g:.24s;--sx:42vmin;--sy:30vmin"></i>
+        <i style="--c:var(--doodle);--x:-9%;--y:12%;--d:4.8s;--g:.32s;--sx:0vmin;--sy:-48vmin"></i>
       </div>
       <div class="core"><span class="mark" id="orbMark"></span><b class="word">Presents</b></div>
     </div>
@@ -818,8 +810,8 @@ body:not(.ready) .cue { opacity: 0 !important; }
     const spots = [[50, 17], [83, 41], [70, 79], [30, 79], [17, 41]];
     el.innerHTML = spots.map(([x, y]) => `<b style="left:${x}%;top:${y}%;background:${color}"></b>`).join('');
   }
-  markHTML($('#heroMark')); markHTML($('#orbMark')); markHTML($('#footMark')); markHTML($('#introMark')); markHTML($('#bentoMark')); markHTML($('#replayMark')); $$('#introMark b').forEach((b, i) => b.style.animationDelay = (1.15 + i * .07) + 's');
-  const intro = $('#intro'), endIntro = () => { intro.classList.add('done'); document.body.classList.add('ready'); setTimeout(() => { intro.style.display = 'none'; }, 950); };
+  markHTML($('#heroMark')); markHTML($('#orbMark')); markHTML($('#footMark')); markHTML($('#bentoMark')); markHTML($('#replayMark')); $$('#orbMark b').forEach((b, i) => b.style.animationDelay = (1.15 + i * .07) + 's');
+  const endIntro = () => { document.body.classList.add('ready'); document.documentElement.classList.remove('opening'); };
   const beats = $$('#story > *'); let beat = -1, beatTimer = null;
   function nextBeat() {
     clearTimeout(beatTimer);
@@ -829,8 +821,12 @@ body:not(.ready) .cue { opacity: 0 !important; }
     if (beat < beats.length - 1) beatTimer = setTimeout(nextBeat, 3200);
     else { chime(); beatTimer = setTimeout(endIntro, 3000); }
   }
-  setTimeout(() => { if (!intro.classList.contains('done')) endIntro(); }, 3000);
-  intro.addEventListener('click', () => { if (!intro.classList.contains('done')) endIntro(); });
+  // the orb builds itself (same timing as the old intro), then the site takes over
+  document.documentElement.classList.add('opening');
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  scrollTo(0, 0);
+  setTimeout(endIntro, 2900);
+  addEventListener('pointerdown', () => { if (!document.body.classList.contains('ready')) endIntro(); }, { once: true });
   markHTML($('#shufMark')); markHTML($('#capMark'), '#0B1316');
 
   // ---------- tiny sound + haptics ----------
