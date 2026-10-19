@@ -569,11 +569,13 @@ body:not(.ready) .cue { opacity: 0 !important; }
 .foot { padding: 24px; text-align: center; font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); }
 .foot .mark { position: relative; inset: auto; display: inline-block; width: 14px; height: 14px; margin: 0 6px -2px 0; }
 @media (prefers-reduced-motion: reduce) { .orb .orb-glow, .orb .orb-glow i, .cue i { animation: none; } .orb .core .mark b, .orb .core .word, .orb .core .sub { animation: none; opacity: 1; scale: 1; translate: none; } html { scroll-behavior: auto; } }
+/* story photos stay inside the demo box */
+#demo .scene-card { position: absolute; inset: 0 max(12px, 2vw); border-radius: 36px; overflow: hidden; z-index: 30; }
+#demo .scene-card b { font-size: clamp(24px, 2.8vw, 40px); }
 </style>
 
 <div class="grain"></div>
 
-<div class="scene-card" id="scene"></div>
 <div class="ending" id="ending">
   <div class="ebeat"><b>That's the chapter.</b><span>Then you seal the next one.</span></div>
   <div class="ebeat bento-wrap">
@@ -645,6 +647,7 @@ body:not(.ready) .cue { opacity: 0 !important; }
 
 <section id="demo">
 <div class="demo-frame"></div>
+<div class="scene-card" id="scene"></div>
 <main class="stage solo" id="stage">
   <div class="top">
     <span class="brand"><span class="mark" id="heroMark"></span>Presents</span>
