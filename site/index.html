@@ -163,7 +163,8 @@ footer b { font-family: var(--serif); font-style: italic; font-weight: 400; font
 
 @media (prefers-reduced-motion: reduce) { * { transition-duration: .01ms !important; animation: none !important; } }
 /* ---------- one screen ---------- */
-html, body { height: 100%; overflow: hidden; }
+html, body { height: auto; overflow-x: clip; }
+html { scroll-behavior: smooth; }
 .stage { height: 100dvh; box-sizing: border-box; display: grid; grid-template-columns: minmax(0,1fr) auto; grid-template-rows: auto minmax(0,1fr); gap: 16px 40px; padding: 18px max(16px, 3vw) 18px; }
 .top { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
 .brand { display: inline-flex; gap: 10px; align-items: center; font-family: var(--serif); font-size: 26px; }
@@ -491,6 +492,80 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
 .vcard { aspect-ratio: 5/3; background: var(--voice); border-radius: 2cqh; display: grid; place-items: center; }
 .vcard .bars { height: 40%; }
 .vcard .kcap { color: rgba(255,255,255,.85); }
+
+/* ================= website shell ================= */
+.nav { position: fixed; top: 16px; left: 50%; translate: -50% -12px; z-index: 80; display: flex; gap: 2px; padding: 5px; border-radius: 999px; background: rgba(14,24,28,.62); backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2); border: 1px solid rgba(255,255,255,.09); opacity: 0; pointer-events: none; transition: opacity .8s ease, translate .8s ease; }
+body.ready .nav { opacity: 1; translate: -50% 0; pointer-events: auto; }
+.nav a { font-family: var(--serif); font-size: 17px; color: var(--muted); text-decoration: none; padding: 7px 16px; border-radius: 999px; transition: color .25s, background .25s; white-space: nowrap; }
+.nav a:hover { color: var(--ink); }
+.nav a.on { color: var(--ink); background: rgba(255,255,255,.08); }
+.nav a:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+@media (max-width: 420px) { .nav a { font-size: 15px; padding: 7px 11px; } }
+
+/* scroll story: one orb, three stops */
+.scrolly { position: relative; height: 420vh; }
+.scrolly .anchor { position: absolute; left: 0; width: 1px; height: 1px; }
+.pin { position: sticky; top: 0; height: 100vh; height: 100dvh; overflow: hidden; }
+.orb { --s: min(46vmin, 380px); position: absolute; left: 50%; top: 50%; width: var(--s); height: var(--s); margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2); will-change: transform; display: grid; place-items: center; }
+.orb .orb-glow { position: absolute; inset: -12%; animation: orbspin 26s linear 1.8s infinite; }
+.orb .orb-glow i { position: absolute; inset: 14%; border-radius: 50%; background: radial-gradient(circle, var(--c) 0%, color-mix(in srgb, var(--c) 50%, transparent) 30%, transparent 68%); opacity: .78; translate: var(--x) var(--y); animation: orbgather 1.6s cubic-bezier(.3,.7,.2,1) var(--g) both, orbdrift 9s ease-in-out calc(1.9s + var(--d)) infinite alternate; }
+@keyframes orbgather { from { opacity: 0; translate: var(--sx) var(--sy); scale: .6; } 30% { opacity: .9; } to { opacity: .78; translate: var(--x) var(--y); scale: 1; } }
+.orb .core .mark b { opacity: 0; scale: 0; animation: dot .5s cubic-bezier(.3,1.4,.5,1) forwards; }
+.orb .core .word { opacity: 0; translate: 0 8px; animation: rise .8s 1.5s ease forwards; }
+.orb .core .sub { font-family: var(--serif); font-style: italic; color: var(--muted); font-size: calc(var(--s) * .055); opacity: 0; translate: 0 8px; animation: rise .8s 1.8s ease forwards; }
+@keyframes orbspin { to { rotate: 360deg; } }
+@keyframes orbdrift { from { translate: var(--x) var(--y); } to { translate: calc(var(--x) * -.6) calc(var(--y) * -.6); } }
+.orb .core .word, .orb .core .sub { display: block; }
+.orb .orb-glow, .orb .core { transition: opacity 1.2s ease, scale 1.4s cubic-bezier(.2,.8,.2,1); }
+html.opening, html.opening body { overflow: hidden; }
+body:not(.ready) .cue { opacity: 0 !important; }
+.orb .core { position: relative; display: grid; justify-items: center; gap: 10px; text-shadow: 0 0 30px rgba(6,12,14,.85), 0 0 8px rgba(6,12,14,.6); }
+.orb .core .mark { position: relative; inset: auto; margin: 0; width: calc(var(--s) * .16); height: calc(var(--s) * .16); }
+.orb .core .mark b { box-shadow: 0 0 14px rgba(255,255,255,.5); }
+.orb .core b.word { font-family: var(--serif); font-weight: 400; font-size: calc(var(--s) * .2); line-height: 1; letter-spacing: -.01em; }
+.cue { position: absolute; left: 50%; bottom: 28px; translate: -50% 0; display: grid; justify-items: center; gap: 8px; font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); transition: opacity .4s; }
+.cue i { width: 1px; height: 34px; background: linear-gradient(var(--muted), transparent); animation: cue 1.8s ease-in-out infinite; transform-origin: top; }
+@keyframes cue { 0% { scale: 1 0; } 50% { scale: 1 1; } 100% { scale: 1 1; opacity: 0; } }
+
+.panel { position: absolute; opacity: 0; will-change: transform, opacity; }
+.panel.p-what { right: max(24px, 7vw); top: 50%; width: min(440px, 40vw); translate: 0 -50%; padding: 34px 34px 38px; border-radius: 28px; background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.025)); border: 1px solid rgba(255,255,255,.08); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.panel small, .closing small, .contact small { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.panel.p-what p { margin: 14px 0 0; font-family: var(--serif); font-size: clamp(24px, 2.4vw, 32px); line-height: 1.22; text-wrap: balance; }
+.panel.p-what p em { color: var(--muted); }
+.panel.p-story { left: 50%; top: calc(50% + min(23vmin, 190px) * .94 + 36px); width: min(620px, calc(100vw - 48px)); translate: -50% 0; text-align: center; }
+.panel.p-story p { margin: 12px 0 0; color: var(--ink); font-size: clamp(16px, 1.5vw, 19px); line-height: 1.6; text-wrap: balance; }
+.panel.p-story p + p { color: var(--muted); }
+.panel.p-story p strong { font-family: var(--serif); font-weight: 400; font-style: italic; font-size: 1.35em; color: var(--ink); }
+@media (max-width: 760px) {
+  .panel.p-what { left: 24px; right: 24px; width: auto; top: auto; bottom: 9vh; translate: none; padding: 24px; }
+  .panel.p-story { top: calc(50% + min(23vmin, 190px) + 12px); }
+}
+
+.closing { padding: 18vh 24px 4vh; text-align: center; display: grid; justify-items: center; gap: 10px; }
+.closing h2 { margin: 0; font-family: var(--serif); font-style: italic; font-weight: 400; font-size: clamp(44px, 7vw, 88px); line-height: 1; }
+.closing p { margin: 0; color: var(--muted); font-size: 16px; max-width: 44ch; line-height: 1.5; }
+#demo { position: relative; scroll-margin-top: 0; }
+#demo .stage { padding-top: 76px; }
+#demo .stage .top { display: none; }
+.demo-frame { position: absolute; inset: 0 max(12px, 2vw); border-radius: 36px; border: 1px solid var(--line); background: radial-gradient(ellipse at 50% 40%, rgba(188,211,220,.06), transparent 60%); pointer-events: none; }
+
+.contact { padding: 16vh 24px 12vh; display: grid; justify-items: center; gap: 14px; text-align: center; }
+.contact h2 { margin: 0; font-family: var(--serif); font-weight: 400; font-size: clamp(38px, 5vw, 64px); line-height: 1.02; }
+.contact > p { margin: 0; color: var(--muted); max-width: 44ch; line-height: 1.5; }
+.crew { display: flex; flex-wrap: wrap; justify-content: center; gap: 28px; margin-top: 26px; }
+.crew a { color: inherit; text-decoration: none; display: grid; justify-items: center; gap: 10px; }
+.crew .ph { width: 104px; height: 104px; border-radius: 50%; background: #2a3236 center/cover; filter: grayscale(1); transition: filter .4s, scale .4s; }
+.crew a:hover .ph { filter: none; scale: 1.04; }
+.crew b { font-family: var(--serif); font-weight: 400; font-size: 21px; }
+.crew span { font-size: 12px; color: var(--muted); }
+.made { margin-top: 30px; display: inline-flex; gap: 8px; align-items: center; padding: 11px 20px; border-radius: 999px; border: 1px solid rgba(255,255,255,.12); color: var(--ink); text-decoration: none; font-size: 14px; transition: background .2s; }
+.made:hover { background: rgba(255,255,255,.06); }
+.foot { padding: 24px; text-align: center; font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); }
+.foot .mark { position: relative; inset: auto; display: inline-block; width: 14px; height: 14px; margin: 0 6px -2px 0; }
+@media (prefers-reduced-motion: reduce) { .orb .orb-glow, .orb .orb-glow i, .cue i { animation: none; } .orb .core .mark b, .orb .core .word, .orb .core .sub { animation: none; opacity: 1; scale: 1; translate: none; } html { scroll-behavior: auto; } }
+/* story photos stay inside the demo box */
+#demo .scene-card { position: absolute; inset: 0 max(12px, 2vw); border-radius: 36px; overflow: hidden; z-index: 30; }
+#demo .scene-card b { font-size: clamp(24px, 2.8vw, 40px); }
 /* reveal finale */
 .wall { position: absolute; inset: 6% 4%; }
 .wtile { position: absolute; translate: calc(-50% + var(--sx)) calc(-50% + var(--sy)); rotate: var(--rot); scale: .6; opacity: 0; border-radius: 1cqh; overflow: hidden; box-shadow: 0 1.5cqh 4cqh -1cqh rgba(0,0,0,.7); transition: translate 1.1s cubic-bezier(.2,.8,.2,1), rotate 1.1s cubic-bezier(.2,.8,.2,1), scale 1.1s cubic-bezier(.2,.8,.2,1), opacity .6s, filter 1.2s; }
@@ -505,30 +580,7 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
 </style>
 
 <div class="grain"></div>
-<div class="intro" id="intro" aria-hidden="true">
-  <div class="intro-glow">
-    <i style="--c:var(--video);--x:-46vmin;--y:-30vmin"></i>
-    <i style="--c:var(--photo);--x:44vmin;--y:-26vmin"></i>
-    <i style="--c:var(--word);--x:-40vmin;--y:32vmin"></i>
-    <i style="--c:var(--voice);--x:42vmin;--y:30vmin"></i>
-    <i style="--c:var(--doodle);--x:0vmin;--y:-48vmin"></i>
-    <div class="mark" id="introMark"></div>
-  </div>
-  <b class="intro-word">Presents</b>
-  <span class="intro-sub">capture a moment, together</span>
-  <div class="story" id="story">
-    <p>Your last semester together goes fast.</p>
-    <p>You take a thousand photos. You never look at them again.</p>
-    <p>The best parts weren't the posed ones anyway. They were the little things.</p>
-    <p>So catch the little things as they happen. A photo. A voice note. A doodle. A few words.</p>
-    <p>Then seal them. Nobody sees them. Not even you.</p>
-    <p>Until one night, in one room, you open it together.</p>
-    <p class="welcome"><span>Welcome to</span><span class="wlogo"><span class="mark" id="welcomeMark"></span>Presents</span></p>
-  </div>
-  <button class="ghost skip" id="storySkip">Skip</button>
-</div>
 
-<div class="scene-card" id="scene"></div>
 <div class="ending" id="ending">
   <div class="ebeat"><b>That's the chapter.</b><span>Then you seal the next one.</span></div>
   <div class="ebeat bento-wrap">
@@ -538,9 +590,9 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
         <div class="htext"><small>Presents</small><h3>capture a moment, together</h3><p>A private time capsule for a small group of friends. Add the little things as they happen. Open them all together.</p>
         <button class="pill" id="replay"><span class="mark" id="replayMark" hidden></span>Go through it again</button></div>
       </section>
-      <section class="c shuffle"><div class="art"><div class="orbit"><i style="--c:var(--video);--a:0deg"></i><i style="--c:var(--photo);--a:72deg"></i><i style="--c:var(--word);--a:144deg"></i><i style="--c:var(--voice);--a:216deg"></i><i style="--c:var(--doodle);--a:288deg"></i></div></div><h4>Shuffle</h4><p>Shuffle picks a photo, video, voice note, doodle or words. One take.</p></section>
+      <section class="c shuffle"><div class="art"><div class="orbit"><i style="--c:var(--video);--a:0deg"></i><i style="--c:var(--photo);--a:72deg"></i><i style="--c:var(--word);--a:144deg"></i><i style="--c:var(--voice);--a:216deg"></i><i style="--c:var(--doodle);--a:288deg"></i></div></div><h4>The app picks</h4><p>Shuffle for a photo, video, voice note, doodle or a few words. One take.</p></section>
       <section class="c sealed"><div class="art"><div class="pile"><i style="--c:var(--photo);--r:-8deg;--x:-18px"></i><i style="--c:var(--word);--r:6deg;--x:16px"></i><i style="--c:var(--voice);--r:-2deg;--x:0px"></i></div></div><h4>Sealed, even from you</h4><p>Once it's in, nobody sees it. Not even you.</p></section>
-      <section class="c reveal"><div class="art"><div class="tvset"><div class="scr"><span style="background:var(--photo)"></span><span style="background:var(--word)"></span><span style="background:var(--voice)"></span><span style="background:var(--doodle)"></span></div><div class="phones3"><i></i><i class="me"></i><i></i></div></div></div><h4>Reveal night</h4><p>Put it on the TV. It opens moment by moment, and everything from one moment shows up together.</p></section>
+      <section class="c reveal"><div class="art"><div class="tvset"><div class="scr"><span style="background:var(--photo)"></span><span style="background:var(--word)"></span><span style="background:var(--voice)"></span><span style="background:var(--doodle)"></span></div><div class="phones3"><i></i><i class="me"></i><i></i></div></div></div><h4>Reveal night</h4><p>Put it on the TV. It opens section by section, and everything from one moment shows up together.</p></section>
       <section class="c person"><div class="art"><div class="touch"><i></i><b></b><i></i></div></div><h4>Start in person</h4><p>Hold your phones close to make the group. No accounts.</p></section>
       <section class="c hide"><div class="art"><div class="hid"><span></span><svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/><path d="M3 3l18 18"/></svg></div></div><h4>Hide anything</h4><p>Anyone can quietly hide a moment. Nobody sees who.</p></section>
       <a class="c svsd" href="https://svsdschool.github.io/competition/" target="_blank" rel="noopener"><span class="arrow">↗</span><small>designed for</small><h4>SVSD Design Sprint</h4><p>A national student design &amp; prototyping competition.</p></a>
@@ -556,6 +608,51 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
     </div>
   </div>
 </div>
+<nav class="nav" id="nav" aria-label="Sections">
+  <a href="#top" data-sec="top">presents</a>
+  <a href="#our-story" data-sec="our-story">our story</a>
+  <a href="#demo" data-sec="demo">demo</a>
+  <a href="#contact" data-sec="contact">contact</a>
+</nav>
+
+<section class="scrolly" id="scrolly">
+  <span class="anchor" id="top" style="top:0"></span>
+  <span class="anchor" id="what" style="top:calc(320vh * .38)"></span>
+  <span class="anchor" id="our-story" style="top:calc(320vh * .86)"></span>
+  <div class="pin">
+    <div class="orb" id="orb" aria-hidden="true">
+      <div class="orb-glow">
+        <i style="--c:var(--video);--x:0%;--y:-14%;--d:0s;--g:0s;--sx:-46vmin;--sy:-30vmin"></i>
+        <i style="--c:var(--photo);--x:14%;--y:-4%;--d:1.2s;--g:.08s;--sx:44vmin;--sy:-26vmin"></i>
+        <i style="--c:var(--word);--x:-14%;--y:-4%;--d:2.4s;--g:.16s;--sx:-40vmin;--sy:32vmin"></i>
+        <i style="--c:var(--voice);--x:9%;--y:12%;--d:3.6s;--g:.24s;--sx:42vmin;--sy:30vmin"></i>
+        <i style="--c:var(--doodle);--x:-9%;--y:12%;--d:4.8s;--g:.32s;--sx:0vmin;--sy:-48vmin"></i>
+      </div>
+      <div class="core"><span class="mark" id="orbMark"></span><b class="word">Presents</b></div>
+    </div>
+    <h1 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Presents: capture a moment, together</h1>
+    <div class="panel p-what" id="pWhat">
+      <small>what it is</small>
+      <p>Presents is for the times we don't capture. <em>The small moments we forget,</em> kept sealed until we celebrate them together.</p>
+    </div>
+    <div class="panel p-story" id="pStory">
+      <small>our story</small>
+      <p>We're seniors in college, and our time together is almost up.</p>
+      <p>We want to remember more than the big nights. We want the little moments in between. We call them <strong>presents</strong>.</p>
+    </div>
+    <div class="cue" id="cue"><span>scroll</span><i></i></div>
+  </div>
+</section>
+
+<section class="closing">
+  <small>the demo</small>
+  <h2>try it out yourself!</h2>
+  <p>Make a group, seal a few moments, then open them together on the TV.</p>
+</section>
+
+<section id="demo">
+<div class="demo-frame"></div>
+<div class="scene-card" id="scene"></div>
 <main class="stage solo" id="stage">
   <div class="top">
     <span class="brand"><span class="mark" id="heroMark"></span>Presents</span>
@@ -571,6 +668,7 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
           <div class="spacer"></div>
           <p class="q">what do friends call you?</p>
           <input class="field" id="nameIn" maxlength="20" placeholder="Your first name" autocomplete="off">
+          <p class="help">This is how you show up in your group.</p>
           <div class="spacer"></div>
           <button class="pill wide" id="nameGo" disabled>Continue</button>
         </div>
@@ -597,14 +695,14 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
 
         <div class="view" data-v="home">
           <p class="home-title" id="homeTitle">Chapter</p>
-          <p class="help" id="homeSub" hidden></p>
+          <p class="help" id="homeSub">3 of us</p>
           <p class="scene-lbl" id="sceneLbl"></p>
           <div class="friends" id="friends"></div>
           <div class="stack" id="stack"></div>
-          <p class="help" id="sealedCount" hidden></p>
+          <p class="help" id="sealedCount">0 moments sealed</p>
           <button class="pill" id="openNow" disabled style="padding:10px 20px;font-size:14px">Open it together</button>
-          <div class="tabs"><span class="on">Now</span><span>Chapters</span></div>
-          <button class="capbtn" id="capBtn" aria-label="Add a moment"><span class="mark" id="capMark"></span></button>
+          <div class="tabs"><span class="on">Our Roll</span><span>Chapters</span></div>
+          <button class="capbtn" id="capBtn" aria-label="Add to the roll"><span class="mark" id="capMark"></span></button>
         </div>
 
         <div class="view" data-v="shuffle" style="padding:0">
@@ -640,12 +738,13 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
           <div class="comp" id="comp"></div>
           <p class="help" id="compSub"></p>
           <div class="spacer"></div>
-          <div style="display:flex;gap:10px;width:100%"><button class="ghost" id="compBack">←</button><button class="pill" id="compNext" style="flex:1">Next</button></div>
+          <div style="display:flex;gap:10px;width:100%" id="compBtns"><button class="ghost" id="compBack">←</button><button class="pill" id="compNext" style="flex:1">Next</button></div>
+          <button class="ghost" id="compAgain" hidden>Go through it again</button>
         </div>
 
         <div class="floaters" id="floaters"></div>
         <div class="toast" id="toast"></div>
-        <div class="saved off" id="saved"><b>It's in.</b></div>
+        <div class="saved off" id="saved"><b>It's in the roll.</b><span class="muted" style="font-size:13px">You'll see it on reveal night, with everyone</span></div>
         <div class="sgrain"></div>
       </div>
     </div>
@@ -670,6 +769,20 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
 </div>
 
 </main>
+</section>
+
+<section class="contact" id="contact">
+  <small>contact</small>
+  <h2>say hi.</h2>
+  <p>We're three designers who wanted a better way to hold onto senior year. Reach out to any of us.</p>
+  <div class="crew">
+    <a href="https://www.linkedin.com/in/braydenwisniewski/" target="_blank" rel="noopener"><div class="ph" style="background-image:url(team1.png)"></div><b>Brayden</b><span>LinkedIn ↗</span></a>
+    <a href="https://www.linkedin.com/in/chris-demassa/" target="_blank" rel="noopener"><div class="ph" style="background-image:url(team2.png)"></div><b>Chris</b><span>LinkedIn ↗</span></a>
+    <a href="https://www.linkedin.com/in/finley-peplinski/" target="_blank" rel="noopener"><div class="ph" style="background-image:url(team3.png)"></div><b>Finley</b><span>LinkedIn ↗</span></a>
+  </div>
+  <a class="made" href="https://svsdschool.github.io/competition/" target="_blank" rel="noopener">Designed for the SVSD Design Sprint ↗</a>
+</section>
+<footer class="foot"><span class="mark" id="footMark"></span>Presents · capture a moment, together</footer>
 
 <script>
 (() => {
@@ -695,7 +808,7 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
     video: { title: 'Video', color: '#E2642E', ask: 'Film a few seconds of it.', lines: ["Show us what's in front of you", 'Ten seconds, no edits', 'Pan slowly across the room'], icon: '<rect x="2.5" y="6.5" width="13" height="11" rx="2"/><path d="M15.5 10.5 21.5 7v10l-6-3.5"/>' },
     voice: { title: 'Voice note', color: '#1A86A6', ask: 'Say it out loud.', lines: ['Say the thing out loud', 'Hum the song stuck in your head', 'Tell someone about your morning'], icon: '<path d="M3 10.4v3.2M6.6 7v10M10.2 4v16M13.8 8.7v6.6M17.4 6.2v11.6M21 10.4v3.2"/>' },
     doodle: { title: 'Doodle', color: '#BCD3DC', ask: 'Draw it. Badly is fine.', lines: ['Draw it badly, on purpose', 'Sketch the view from where you are', 'Doodle what you had for lunch'], icon: '<path d="M4 20l1.2-4.2L16.6 4.4a2 2 0 0 1 2.9 0l.1.1a2 2 0 0 1 0 2.9L8.2 18.8 4 20Z"/><path d="m14.5 6.5 3 3"/>' },
-    word: { title: 'Words', color: '#E5D24A', ask: 'Say it in a few words.', lines: ["Write the one line you'd forget", 'Something you overheard today', "What you'd tell yourself a year ago"], icon: '<path d="M4 7h16M4 12h16M10 17h10"/>' },
+    word: { title: 'Typed words', color: '#E5D24A', ask: 'Say it in a few words.', lines: ["Write the one line you'd forget", 'Something you overheard today', "What you'd tell yourself a year ago"], icon: '<path d="M4 7h16M4 12h16M10 17h10"/>' },
   };
   const ORDER = ['video', 'photo', 'word', 'voice', 'doodle'];
   const PEOPLE = { Maya: '#D257B4', Jordan: '#E2642E' };
@@ -706,8 +819,8 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
     const spots = [[50, 17], [83, 41], [70, 79], [30, 79], [17, 41]];
     el.innerHTML = spots.map(([x, y]) => `<b style="left:${x}%;top:${y}%;background:${color}"></b>`).join('');
   }
-  markHTML($('#heroMark')); markHTML($('#introMark')); markHTML($('#welcomeMark')); markHTML($('#bentoMark')); markHTML($('#replayMark')); $$('#introMark b').forEach((b, i) => b.style.animationDelay = (1.15 + i * .07) + 's');
-  const intro = $('#intro'), endIntro = () => { intro.classList.add('done'); setTimeout(() => { intro.style.display = 'none'; $('#nameIn').focus(); }, 950); };
+  markHTML($('#heroMark')); markHTML($('#orbMark')); markHTML($('#footMark')); markHTML($('#bentoMark')); markHTML($('#replayMark')); $$('#orbMark b').forEach((b, i) => b.style.animationDelay = (1.15 + i * .07) + 's');
+  const endIntro = () => { document.body.classList.add('ready'); document.documentElement.classList.remove('opening'); };
   const beats = $$('#story > *'); let beat = -1, beatTimer = null;
   function nextBeat() {
     clearTimeout(beatTimer);
@@ -717,14 +830,19 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
     if (beat < beats.length - 1) beatTimer = setTimeout(nextBeat, 3200);
     else { chime(); beatTimer = setTimeout(endIntro, 3000); }
   }
-  setTimeout(() => { if (!intro.classList.contains('done')) { const gr = $('.intro-glow').getBoundingClientRect(); intro.style.setProperty('--gx', (innerWidth / 2 - (gr.left + gr.width / 2)) + 'px'); intro.style.setProperty('--gy', (innerHeight / 2 - (gr.top + gr.height / 2)) + 'px'); intro.classList.add('telling'); setTimeout(nextBeat, 700); } }, 3000);
-  intro.addEventListener('click', (e) => { if (e.target.closest('button')) return; if (intro.classList.contains('telling')) nextBeat(); });
-  $('#storySkip').addEventListener('click', endIntro); markHTML($('#shufMark')); markHTML($('#capMark'), '#0B1316');
+  // the orb builds itself (same timing as the old intro), then the site takes over
+  document.documentElement.classList.add('opening');
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  scrollTo(0, 0);
+  setTimeout(endIntro, 2900);
+  addEventListener('pointerdown', () => { if (!document.body.classList.contains('ready')) endIntro(); }, { once: true });
+  markHTML($('#shufMark')); markHTML($('#capMark'), '#0B1316');
 
   // ---------- tiny sound + haptics ----------
   let ac = null;
   const audio = () => { try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); } catch (e) {} return ac; };
   function tone(f, dur, vol, type = 'sine', delay = 0) {
+    return; // demo is silent
     const a = audio(); if (!a) return;
     const o = a.createOscillator(), g = a.createGain(), t = a.currentTime + delay;
     o.type = type; o.frequency.value = f;
@@ -744,7 +862,7 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
     $$('.view', screen).forEach((el) => el.classList.toggle('on', el.dataset.v === v));
     blobsVisible(v === 'shuffle');
   }
-  const HINTS = ['Type your name to start.', "Maya and Jordan are here. Drag their phones close to yours to connect.", 'Tap the white dots and shuffle.', 'Add what you got. Do it a couple of times. Friends add things too.', 'Put it on the TV. Tap Next on your phone to go moment by moment.'];
+  const HINTS = ['Type your name to start.', "Maya and Jordan are here. Drag their phones close to yours to connect.", 'Tap the white dots and shuffle.', 'Add what you got. Do it a couple of times. Friends add things too.', 'Put it on the TV. Tap Next on your phone to go section by section.'];
   function step(i) { $('#hint').textContent = HINTS[i] || ''; }
   // the phone keeps its real 360×760 size, scaled to fit the screen
   function fit() {
@@ -934,7 +1052,7 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
       const k = m ? KINDS[m.kind] : KINDS[ORDER[i]];
       const bg = m && m.src && m.kind !== 'voice' ? `url(${m.src}) center/cover` : m && m.art ? `url(${m.art}) center/cover` : k.color;
       return `<div class="t" style="width:${s[3] * .78}px;height:${s[4] * .78}px;left:calc(50% + ${s[0] * .78}px);top:calc(50% + ${s[1] * .78}px);translate:-50% -50%;rotate:${s[2]}deg;background:${bg};opacity:${m ? 1 : .45}"></div>`;
-    }).join('') + `<div class="date"><b>${S.weeks ? 'Tonight' : `${reveal.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} · ${reveal.getFullYear()}`}</b></div>`;
+    }).join('') + `<div class="date"><small>Opens</small><b>${S.weeks ? 'Tonight' : `${reveal.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} · ${reveal.getFullYear()}`}</b></div>`;
     const n = S.moments.length;
     $('#sealedCount').textContent = `${n} moment${n === 1 ? '' : 's'} sealed`;
     $('#openNow').disabled = S.moments.filter((m) => m.by === S.me).length < 1;
@@ -974,9 +1092,9 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
   function land() { mode = 'land'; modeT = 0; last = winner; tick(1600); buzz([10, 40, 20]); blobs.forEach((b) => { b.vx *= .3; b.vy *= .3; }); }
   function showResult() {
     shown = true; const k = KINDS[winner];
-    $('#rTitle').textContent = ({ photo: 'A photo!', video: 'A video!', voice: 'A voice note!', doodle: 'Ooh, a doodle.', word: 'Words.' })[winner]; $('#rIcon').innerHTML = `<svg viewBox="0 0 24 24">${k.icon}</svg>`;
+    $('#rTitle').textContent = k.title; $('#rIcon').innerHTML = `<svg viewBox="0 0 24 24">${k.icon}</svg>`;
     $('#rLine').textContent = SCENES[S.scene] ? SCENES[S.scene].ask : k.lines[Math.floor(Math.random() * 3)];
-    $('#rReroll').outerHTML = rerolls > 0 && !SCENES[S.scene] ? `<button class="reroll" id="rReroll">↻ 1 free reroll</button>` : `<span class="reroll it serif" id="rReroll" style="color:var(--muted)">Fate has spoken.</span>`;
+    $('#rReroll').outerHTML = rerolls > 0 && !SCENES[S.scene] ? `<button class="reroll" id="rReroll">↻ Reroll · 1 free</button>` : `<span class="reroll it serif" id="rReroll" style="color:var(--muted)">Fate has spoken.</span>`;
     const rr = $('#rReroll'); if (rr.tagName === 'BUTTON') rr.addEventListener('click', () => { rerolls--; startSpin(); });
     $('#shufSpin').classList.add('off'); $('#result').classList.remove('off'); chime();
   }
@@ -1104,7 +1222,7 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
     if (m.kind === 'word') return `<div style="position:absolute;inset:0;background:${k.color}"></div><div class="sgrain" style="position:absolute;inset:0;background-image:var(--grain);background-size:256px;mix-blend-mode:soft-light;opacity:.9"></div><div class="wordcard" style="${big ? '' : 'font-size:2.4cqh;padding:6%'}">${m.text || ''}</div>`;
     if (m.kind === 'voice') return `<div style="position:absolute;inset:0;background:${k.color}"></div><div class="voicecard"><div class="bars">${Array.from({ length: big ? 28 : 8 }, (_, i) => `<i style="animation-delay:${(i * 37 % 100) / 100}s"></i>`).join('')}</div></div>`;
     const src = m.src || m.art;
-    if (m.kind === 'video' && m.src) return `<video src="${m.src}" ${big ? 'autoplay' : 'muted'} loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video>`;
+    if (m.kind === 'video' && m.src) return `<video src="${m.src}" muted autoplay loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video>`;
     if (src) return `<div style="position:absolute;inset:0;background:url(${src}) center/cover"></div>`;
     return `<div style="position:absolute;inset:0;background:${k.color}"></div>`;
   }
@@ -1141,12 +1259,12 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
       };
       sc.innerHTML = `<div class="table"><div class="tlabel">${dayPart(R.sections[st.si].start)}</div>${items.map(card).join('')}</div>`;
       setTimeout(() => sc.querySelector('.table')?.classList.add('in'), 60);
-      const v = items.find((m) => m.kind === 'voice' && m.src); if (v) { const a = new Audio(v.src); a.play().catch(() => {}); }
+      const v = items.find((m) => m.kind === 'voice' && m.src); if (v) {  }
     } else if (st.type === 'moment') {
       const m = R.sections[st.si].items[st.ii];
       sc.innerHTML = `<div class="moment"><div class="media">${mediaHTML(m, true)}</div><div class="label"><span>${stamp(m.at)}</span><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6"><path d="M1.5 12S5.5 4.5 12 4.5 22.5 12 22.5 12 18.5 19.5 12 19.5 1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3.2"/></svg>${m.by}</span></div></div>`;
       setTimeout(() => sc.querySelector('.moment')?.classList.add('sharp'), 300);
-      if (m.kind === 'voice' && m.src) { const a = new Audio(m.src); a.play().catch(() => {}); sc._audio = a; }
+      if (m.kind === 'voice' && m.src) {  }
     } else {
       // Finale: every moment flies in to make one wall, it settles, then the chapter gets its title card.
       const all = R.sections.flatMap((x) => x.items), n = all.length;
@@ -1178,7 +1296,10 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
         fpn.querySelector('.fbig').innerHTML = av(who);
         fpn.querySelector('.fname').textContent = who;
       });
-      $('#compNext').textContent = R.i === R.steps.length - 1 ? 'Done' : 'Next';
+      // At the end the controls step aside: the TV says it's over, the phone just offers another go.
+      const last = R.i === R.steps.length - 1;
+      $('#compBtns').style.display = last ? 'none' : 'flex';
+      $('#compAgain').hidden = !last;
     }
     $('#tvProg').innerHTML = R.steps.map((_, i) => `<i class="${i <= R.i ? 'on' : ''}"></i>`).join('');
     $('#tvHint').textContent = R.i === R.steps.length - 1 ? 'that\'s everything' : 'click to keep going';
@@ -1233,7 +1354,8 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
   }
   R = sample(); renderTV();
 
-  $('#compNext').addEventListener('click', () => { if (R.i === R.steps.length - 1) showEnding(); else go(1); });
+  $('#compNext').addEventListener('click', () => go(1));
+  $('#compAgain').addEventListener('click', () => { location.hash = 'again'; location.reload(); });
   // ---------- the ending ----------
   const TEAM = [{ name: 'Brayden', img: 'team1.png', url: 'https://www.linkedin.com/in/braydenwisniewski/' }, { name: 'Chris', img: 'team2.png', url: 'https://www.linkedin.com/in/chris-demassa/' }, { name: 'Finley', img: 'team3.png', url: 'https://www.linkedin.com/in/finley-peplinski/' }];
   $('#faces3').innerHTML = TEAM.map((t) => `<a class="tm" href="${t.url}" target="_blank" rel="noopener" aria-label="${t.name} on LinkedIn"><figure><div class="ph" style="${t.img ? `background-image:url(${t.img})` : ''}">${t.img ? '' : '·'}</div><figcaption>${t.name}</figcaption></figure></a>`).join('');
@@ -1242,7 +1364,7 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
     beats.forEach((b, k) => setTimeout(() => { beats.forEach((x) => x.classList.remove('on')); b.classList.add('on'); }, 900 + k * 3600));
   }
   $('#replay').addEventListener('click', () => { location.hash = 'again'; location.reload(); });
-  if (location.hash === '#again') { history.replaceState(null, '', location.pathname + location.search); endIntro(); }
+  if (location.hash === '#again') { history.replaceState(null, '', location.pathname + location.search); endIntro(); requestAnimationFrame(() => $('#demo').scrollIntoView({ behavior: 'instant' })); }
   const NOTE_TO = ''; // where notes go
   $('#note').addEventListener('submit', (ev) => {
     ev.preventDefault();
@@ -1284,5 +1406,69 @@ body.ended .stage, body.ended .mini { visibility: hidden; }
   $('#tvSample').addEventListener('click', () => { R = sample(); renderTV(); $('#tvSample').hidden = true; $('#revealIntro').textContent = 'A sample reveal night, "Senior spring". Click the TV or press → to keep going.'; if (S.view === 'companion') { renderHome(); show('home'); } });
 
   addEventListener('resize', measure);
+})();
+</script>
+
+<style>#orb, #pWhat, #pStory { will-change: transform, opacity; }</style>
+<script>
+// Scroll story: orb center → left (with "what it is") → center (with "our story")
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const wrap = $('#scrolly'), orb = $('#orb'), what = $('#pWhat'), story = $('#pStory'), cue = $('#cue');
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const ease = (t) => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  const seg = (p, a, b) => ease(clamp((p - a) / (b - a)));
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // The story follows the scroll position with a little lag, so wheel ticks and trackpad flicks glide.
+  let cur = null, last = 0;
+  const target = () => { const r = wrap.getBoundingClientRect(); return clamp(-r.top / (wrap.offsetHeight - innerHeight)); };
+  function frame() {
+    const p = cur, narrow = innerWidth <= 760;
+    const toLeft = seg(p, .12, .36), back = seg(p, .58, .8);
+    const leftX = narrow ? 0 : -(innerWidth * .5 - Math.max(24, innerWidth * .07)) + orb.offsetWidth * .5 + 10;
+    const leftY = narrow ? -innerHeight * .2 : 0;
+    const x = leftX * (toLeft - back), y = leftY * (toLeft - back) - (narrow ? 0 : innerHeight * .1) * back;
+    const s = 1 - .16 * (toLeft - back) - .06 * back;
+    orb.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
+    const wIn = seg(p, .26, .4), wOut = seg(p, .56, .66);
+    what.style.opacity = wIn - wOut;
+    what.style.transform = `translateX(${(1 - wIn) * 60 - wOut * 30}px)`;
+    what.style.pointerEvents = wIn - wOut > .5 ? 'auto' : 'none';
+    const sIn = seg(p, .74, .88);
+    story.style.opacity = sIn;
+    story.style.transform = `translateY(${(1 - sIn) * 24 - (narrow ? 0 : innerHeight * .1) * back}px)`;
+    cue.style.opacity = 1 - clamp(p / .06);
+  }
+  let raf = 0;
+  const tick = (now) => {
+    const t = target(), dt = Math.min(.05, (now - last) / 1000 || .016); last = now;
+    cur = cur === null || reduce ? t : cur + (t - cur) * (1 - Math.exp(-dt * 9));
+    frame();
+    raf = Math.abs(t - cur) > .0004 ? requestAnimationFrame(tick) : 0;
+    if (!raf) { cur = t; frame(); }
+  };
+  const kick = () => { if (!raf) { last = performance.now(); raf = requestAnimationFrame(tick); } };
+  addEventListener('scroll', kick, { passive: true });
+  addEventListener('resize', () => { cur = target(); frame(); }); cur = target(); frame();
+
+  // nav: highlight the section in view; leaving the ending overlay when jumping around
+  const links = [...document.querySelectorAll('.nav a')];
+  const at = (id) => { links.forEach((a) => a.classList.toggle('on', a.dataset.sec === id)); };
+  function spy() {
+    const y = innerHeight * .5, demo = $('#demo').getBoundingClientRect(), contact = $('#contact').getBoundingClientRect();
+    const range = wrap.offsetHeight - innerHeight, p = clamp(-wrap.getBoundingClientRect().top / range);
+    if (contact.top < y) at('contact'); else if (demo.top < y) at('demo'); else if (p > .7) at('our-story'); else at('top');
+  }
+  addEventListener('scroll', spy, { passive: true }); spy();
+  links.forEach((a) => a.addEventListener('click', () => {
+    const e = $('#ending'); if (e.classList.contains('on')) { e.classList.remove('on'); document.body.classList.remove('ended'); }
+  }));
+
+  // focus the first field once the demo is actually on screen
+  let focused = false;
+  new IntersectionObserver((es) => es.forEach((e) => {
+    if (e.isIntersecting && !focused && document.body.classList.contains('ready')) { focused = true; $('#nameIn').focus({ preventScroll: true }); }
+  }), { threshold: .6 }).observe($('#stage'));
+  if (reduce) document.documentElement.style.scrollBehavior = 'auto';
 })();
 </script>
