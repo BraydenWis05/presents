@@ -733,7 +733,8 @@ body:not(.ready) .cue { opacity: 0 !important; }
           <div class="comp" id="comp"></div>
           <p class="help" id="compSub"></p>
           <div class="spacer"></div>
-          <div style="display:flex;gap:10px;width:100%"><button class="ghost" id="compBack">←</button><button class="pill" id="compNext" style="flex:1">Next</button></div>
+          <div style="display:flex;gap:10px;width:100%" id="compBtns"><button class="ghost" id="compBack">←</button><button class="pill" id="compNext" style="flex:1">Next</button></div>
+          <button class="ghost" id="compAgain" hidden>Go through it again</button>
         </div>
 
         <div class="floaters" id="floaters"></div>
@@ -1278,7 +1279,10 @@ body:not(.ready) .cue { opacity: 0 !important; }
         fpn.querySelector('.fbig').innerHTML = av(who);
         fpn.querySelector('.fname').textContent = who;
       });
-      $('#compNext').textContent = R.i === R.steps.length - 1 ? 'Done' : 'Next';
+      // At the end the controls step aside: the TV says it's over, the phone just offers another go.
+      const last = R.i === R.steps.length - 1;
+      $('#compBtns').style.display = last ? 'none' : 'flex';
+      $('#compAgain').hidden = !last;
     }
     $('#tvProg').innerHTML = R.steps.map((_, i) => `<i class="${i <= R.i ? 'on' : ''}"></i>`).join('');
     $('#tvHint').textContent = R.i === R.steps.length - 1 ? 'that\'s everything' : 'click to keep going';
@@ -1333,7 +1337,8 @@ body:not(.ready) .cue { opacity: 0 !important; }
   }
   R = sample(); renderTV();
 
-  $('#compNext').addEventListener('click', () => { if (R.i === R.steps.length - 1) showEnding(); else go(1); });
+  $('#compNext').addEventListener('click', () => go(1));
+  $('#compAgain').addEventListener('click', () => { location.hash = 'again'; location.reload(); });
   // ---------- the ending ----------
   const TEAM = [{ name: 'Brayden', img: 'team1.png', url: 'https://www.linkedin.com/in/braydenwisniewski/' }, { name: 'Chris', img: 'team2.png', url: 'https://www.linkedin.com/in/chris-demassa/' }, { name: 'Finley', img: 'team3.png', url: 'https://www.linkedin.com/in/finley-peplinski/' }];
   $('#faces3').innerHTML = TEAM.map((t) => `<a class="tm" href="${t.url}" target="_blank" rel="noopener" aria-label="${t.name} on LinkedIn"><figure><div class="ph" style="${t.img ? `background-image:url(${t.img})` : ''}">${t.img ? '' : '·'}</div><figcaption>${t.name}</figcaption></figure></a>`).join('');
