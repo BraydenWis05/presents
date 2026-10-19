@@ -1392,6 +1392,7 @@ body:not(.ready) .cue { opacity: 0 !important; }
 })();
 </script>
 
+<style>#orb, #pWhat, #pStory { will-change: transform, opacity; }</style>
 <script>
 // Scroll story: orb center → left (with "what it is") → center (with "our story")
 (() => {
@@ -1401,9 +1402,11 @@ body:not(.ready) .cue { opacity: 0 !important; }
   const ease = (t) => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   const seg = (p, a, b) => ease(clamp((p - a) / (b - a)));
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // The story follows the scroll position with a little lag, so wheel ticks and trackpad flicks glide.
+  let cur = null, last = 0;
+  const target = () => { const r = wrap.getBoundingClientRect(); return clamp(-r.top / (wrap.offsetHeight - innerHeight)); };
   function frame() {
-    const r = wrap.getBoundingClientRect(), range = wrap.offsetHeight - innerHeight;
-    const p = clamp(-r.top / range), narrow = innerWidth <= 760;
+    const p = cur, narrow = innerWidth <= 760;
     const toLeft = seg(p, .12, .36), back = seg(p, .58, .8);
     const leftX = narrow ? 0 : -(innerWidth * .5 - Math.max(24, innerWidth * .07)) + orb.offsetWidth * .5 + 10;
     const leftY = narrow ? -innerHeight * .2 : 0;
@@ -1419,9 +1422,17 @@ body:not(.ready) .cue { opacity: 0 !important; }
     story.style.transform = `translateY(${(1 - sIn) * 24 - (narrow ? 0 : innerHeight * .1) * back}px)`;
     cue.style.opacity = 1 - clamp(p / .06);
   }
-  let raf = 0; const tick = () => { raf = 0; frame(); };
-  addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(tick); }, { passive: true });
-  addEventListener('resize', frame); frame();
+  let raf = 0;
+  const tick = (now) => {
+    const t = target(), dt = Math.min(.05, (now - last) / 1000 || .016); last = now;
+    cur = cur === null || reduce ? t : cur + (t - cur) * (1 - Math.exp(-dt * 9));
+    frame();
+    raf = Math.abs(t - cur) > .0004 ? requestAnimationFrame(tick) : 0;
+    if (!raf) { cur = t; frame(); }
+  };
+  const kick = () => { if (!raf) { last = performance.now(); raf = requestAnimationFrame(tick); } };
+  addEventListener('scroll', kick, { passive: true });
+  addEventListener('resize', () => { cur = target(); frame(); }); cur = target(); frame();
 
   // nav: highlight the section in view; leaving the ending overlay when jumping around
   const links = [...document.querySelectorAll('.nav a')];
