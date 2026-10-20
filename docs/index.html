@@ -640,9 +640,9 @@ body:not(.ready) .cue { opacity: 0 !important; }
         <div class="htext"><small>Presents</small><h3>capture a moment, together</h3><p>A private time capsule for a small group of friends. Add the little things as they happen. Open them all together.</p>
         <button class="pill" id="replay"><span class="mark" id="replayMark" hidden></span>Go through it again</button></div>
       </section>
-      <section class="c shuffle"><div class="art"><div class="orbit"><i style="--c:var(--video);--a:0deg"></i><i style="--c:var(--photo);--a:72deg"></i><i style="--c:var(--word);--a:144deg"></i><i style="--c:var(--voice);--a:216deg"></i><i style="--c:var(--doodle);--a:288deg"></i></div></div><h4>The app picks</h4><p>Shuffle for a photo, video, voice note, doodle or a few words. One take.</p></section>
+      <section class="c shuffle"><div class="art"><div class="orbit"><i style="--c:var(--video);--a:0deg"></i><i style="--c:var(--photo);--a:72deg"></i><i style="--c:var(--word);--a:144deg"></i><i style="--c:var(--voice);--a:216deg"></i><i style="--c:var(--doodle);--a:288deg"></i></div></div><h4>Shuffle</h4><p>Shuffle picks a photo, video, voice note, doodle or words. One take.</p></section>
       <section class="c sealed"><div class="art"><div class="pile"><i style="--c:var(--photo);--r:-8deg;--x:-18px"></i><i style="--c:var(--word);--r:6deg;--x:16px"></i><i style="--c:var(--voice);--r:-2deg;--x:0px"></i></div></div><h4>Sealed, even from you</h4><p>Once it's in, nobody sees it. Not even you.</p></section>
-      <section class="c reveal"><div class="art"><div class="tvset"><div class="scr"><span style="background:var(--photo)"></span><span style="background:var(--word)"></span><span style="background:var(--voice)"></span><span style="background:var(--doodle)"></span></div><div class="phones3"><i></i><i class="me"></i><i></i></div></div></div><h4>Reveal night</h4><p>Put it on the TV. It opens section by section, and everything from one moment shows up together.</p></section>
+      <section class="c reveal"><div class="art"><div class="tvset"><div class="scr"><span style="background:var(--photo)"></span><span style="background:var(--word)"></span><span style="background:var(--voice)"></span><span style="background:var(--doodle)"></span></div><div class="phones3"><i></i><i class="me"></i><i></i></div></div></div><h4>Reveal night</h4><p>Put it on the TV. It opens moment by moment, and everything from one moment shows up together.</p></section>
       <section class="c person"><div class="art"><div class="touch"><i></i><b></b><i></i></div></div><h4>Start in person</h4><p>Hold your phones close to make the group. No accounts.</p></section>
       <section class="c hide"><div class="art"><div class="hid"><span></span><svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/><path d="M3 3l18 18"/></svg></div></div><h4>Hide anything</h4><p>Anyone can quietly hide a moment. Nobody sees who.</p></section>
       <a class="c svsd" href="https://svsdschool.github.io/competition/" target="_blank" rel="noopener"><span class="arrow">↗</span><small>designed for</small><h4>SVSD Design Sprint</h4><p>A national student design &amp; prototyping competition.</p></a>
@@ -718,7 +718,6 @@ body:not(.ready) .cue { opacity: 0 !important; }
           <div class="spacer"></div>
           <p class="q">what do friends call you?</p>
           <input class="field" id="nameIn" maxlength="20" placeholder="Your first name" autocomplete="off">
-          <p class="help">This is how you show up in your group.</p>
           <div class="spacer"></div>
           <button class="pill wide" id="nameGo" disabled>Continue</button>
         </div>
@@ -726,7 +725,7 @@ body:not(.ready) .cue { opacity: 0 !important; }
         <div class="view" data-v="unite">
           <p class="help" id="uniteCount" style="align-self:flex-end">just you so far</p>
           <p class="q">make your group</p>
-          <p class="help">Bring a friend's phone close to yours to add them.</p>
+          <p class="help">Hold your phones close.</p>
           <div class="ring" id="ring"></div>
           <p class="q" style="font-size:20px" id="uniteStatus">waiting for a phone nearby…</p>
           <input class="field" id="groupIn" maxlength="28" placeholder="Name your group" style="font-size:24px" hidden>
@@ -740,26 +739,25 @@ body:not(.ready) .cue { opacity: 0 !important; }
           <div class="chips" id="chips"></div>
           <input type="date" class="datein" id="dateIn">
           <div class="spacer"></div>
-          <button class="pill wide" id="whenGo">Start group</button>
+          <button class="pill wide" id="whenGo">Start the chapter</button>
         </div>
 
         <div class="view" data-v="home">
           <p class="home-title" id="homeTitle">Chapter</p>
-          <p class="help" id="homeSub">3 of us</p>
+          <p class="help" id="homeSub" hidden></p>
           <p class="scene-lbl" id="sceneLbl"></p>
           <div class="friends" id="friends"></div>
           <div class="stack" id="stack"></div>
-          <p class="help" id="sealedCount">0 moments sealed</p>
+          <p class="help" id="sealedCount" hidden></p>
           <button class="pill" id="openNow" disabled style="padding:10px 20px;font-size:14px">Open it together</button>
-          <div class="tabs"><span class="on">Our Roll</span><span>Chapters</span></div>
-          <button class="capbtn" id="capBtn" aria-label="Add to the roll"><span class="mark" id="capMark"></span></button>
+          <div class="tabs"><span class="on">Now</span><span>Chapters</span></div>
+          <button class="capbtn" id="capBtn" aria-label="Add a moment"><span class="mark" id="capMark"></span></button>
         </div>
 
         <div class="view" data-v="shuffle" style="padding:0">
           <button class="close" data-close aria-label="Close">✕</button>
           <div class="shuf-home" id="shufHome">
             <div class="mark" id="shufMark" style="position:absolute;top:42%;left:50%;translate:-50% -50%;margin:0"></div>
-            <p class="q it" style="position:absolute;top:63%">capture a moment</p>
             <button class="pill" id="shufGo" style="position:absolute;top:72%">Shuffle</button>
           </div>
           <div class="shuf-spin off" id="shufSpin">
@@ -770,7 +768,7 @@ body:not(.ready) .cue { opacity: 0 !important; }
             <div class="rtitle" id="rTitle">Photo</div>
             <div class="ricon" id="rIcon"></div>
             <div class="rline" id="rLine"></div>
-            <div class="ract"><button class="reroll" id="rReroll">↻ Reroll</button><button class="pill" id="rGo">Let's go</button></div>
+            <div class="ract"><button class="reroll" id="rReroll">↻ 1 free reroll</button><button class="pill" id="rGo">Let's go</button></div>
           </div>
         </div>
 
@@ -778,7 +776,7 @@ body:not(.ready) .cue { opacity: 0 !important; }
           <button class="close" data-close aria-label="Close">✕</button>
           <div class="cap-head"><span class="dot" id="capDot"></span><div><small id="capKind">Doodle</small><b id="capAsk">Draw it. Badly is fine.</b></div></div>
           <div id="capBody" class="wide"></div>
-          <p class="note">One take, no redos. Once it's in, it's sealed. Even from you.</p>
+          <p class="note">One take. Sealed, even from you.</p>
           <button class="pill" id="sealGo" disabled>Seal it in</button>
         </div>
 
@@ -794,7 +792,7 @@ body:not(.ready) .cue { opacity: 0 !important; }
 
         <div class="floaters" id="floaters"></div>
         <div class="toast" id="toast"></div>
-        <div class="saved off" id="saved"><b>It's in the roll.</b><span class="muted" style="font-size:13px">You'll see it on reveal night, with everyone</span></div>
+        <div class="saved off" id="saved"><b>It's in.</b></div>
         <div class="sgrain"></div>
       </div>
     </div>
@@ -808,13 +806,13 @@ body:not(.ready) .cue { opacity: 0 !important; }
   <div class="tv" id="tv" tabindex="0" aria-label="Reveal night player. Click to advance.">
     <div class="tv-progress" id="tvProg"></div>
     <div class="sgrain"></div>
-    <div class="tv-hint" id="tvHint">click to keep going</div>
+    <div class="tv-hint" id="tvHint"></div>
   </div>
   <div class="tv-ctrl">
     <button class="ghost" id="tvBack">← Back</button>
     <button class="ghost" id="tvRestart">Start over</button>
     <button class="ghost" id="tvSample" hidden>Watch the sample instead</button>
-    <span class="muted cap" id="revealIntro">A sample reveal night, "Senior spring". Click the TV or press → to keep going.</span>
+    <span class="muted cap" id="revealIntro">A sample reveal night, "Senior spring".</span>
   </div>
 </div>
 
@@ -854,11 +852,11 @@ body:not(.ready) .cue { opacity: 0 !important; }
 
   // ---------- media types ----------
   const KINDS = {
-    photo: { title: 'Photo', color: '#D257B4', ask: "Snap whatever's in front of you.", lines: ['Catch what caught your eye', 'Something blue, close by', 'The light where you are right now'], icon: '<path d="M3 8.5h3.8L8.6 6h6.8l1.8 2.5H21V19H3Z"/><circle cx="12" cy="13.2" r="3.4"/>' },
-    video: { title: 'Video', color: '#E2642E', ask: 'Film a few seconds of it.', lines: ["Show us what's in front of you", 'Ten seconds, no edits', 'Pan slowly across the room'], icon: '<rect x="2.5" y="6.5" width="13" height="11" rx="2"/><path d="M15.5 10.5 21.5 7v10l-6-3.5"/>' },
-    voice: { title: 'Voice note', color: '#1A86A6', ask: 'Say it out loud.', lines: ['Say the thing out loud', 'Hum the song stuck in your head', 'Tell someone about your morning'], icon: '<path d="M3 10.4v3.2M6.6 7v10M10.2 4v16M13.8 8.7v6.6M17.4 6.2v11.6M21 10.4v3.2"/>' },
-    doodle: { title: 'Doodle', color: '#BCD3DC', ask: 'Draw it. Badly is fine.', lines: ['Draw it badly, on purpose', 'Sketch the view from where you are', 'Doodle what you had for lunch'], icon: '<path d="M4 20l1.2-4.2L16.6 4.4a2 2 0 0 1 2.9 0l.1.1a2 2 0 0 1 0 2.9L8.2 18.8 4 20Z"/><path d="m14.5 6.5 3 3"/>' },
-    word: { title: 'Words', color: '#E5D24A', ask: 'Say it in a few words.', lines: ["Write the one line you'd forget", 'Something you overheard today', "What you'd tell yourself a year ago"], icon: '<path d="M4 7h16M4 12h16M10 17h10"/>' },
+    photo: { title: 'Photo', color: '#D257B4', ask: "Snap whatever's in front of you.", lines: ['Point it at whatever is happening.'], icon: '<path d="M3 8.5h3.8L8.6 6h6.8l1.8 2.5H21V19H3Z"/><circle cx="12" cy="13.2" r="3.4"/>' },
+    video: { title: 'Video', color: '#E2642E', ask: 'Film a few seconds of it.', lines: ['Ten seconds. No retakes.'], icon: '<rect x="2.5" y="6.5" width="13" height="11" rx="2"/><path d="M15.5 10.5 21.5 7v10l-6-3.5"/>' },
+    voice: { title: 'Voice note', color: '#1A86A6', ask: 'Say it out loud.', lines: ['Say the thing out loud.'], icon: '<path d="M3 10.4v3.2M6.6 7v10M10.2 4v16M13.8 8.7v6.6M17.4 6.2v11.6M21 10.4v3.2"/>' },
+    doodle: { title: 'Doodle', color: '#BCD3DC', ask: 'Draw it. Badly is fine.', lines: ['Bad art strongly encouraged.'], icon: '<path d="M4 20l1.2-4.2L16.6 4.4a2 2 0 0 1 2.9 0l.1.1a2 2 0 0 1 0 2.9L8.2 18.8 4 20Z"/><path d="m14.5 6.5 3 3"/>' },
+    word: { title: 'Words', color: '#E5D24A', ask: 'Say it in a few words.', lines: ['A few words. Make it an inside joke.'], icon: '<path d="M4 7h16M4 12h16M10 17h10"/>' },
   };
   const ORDER = ['video', 'photo', 'word', 'voice', 'doodle'];
   const PEOPLE = { Maya: '#D257B4', Jordan: '#E2642E' };
@@ -1102,7 +1100,7 @@ body:not(.ready) .cue { opacity: 0 !important; }
       const k = m ? KINDS[m.kind] : KINDS[ORDER[i]];
       const bg = m && m.src && m.kind !== 'voice' ? `url(${m.src}) center/cover` : m && m.art ? `url(${m.art}) center/cover` : k.color;
       return `<div class="t" style="width:${s[3] * .78}px;height:${s[4] * .78}px;left:calc(50% + ${s[0] * .78}px);top:calc(50% + ${s[1] * .78}px);translate:-50% -50%;rotate:${s[2]}deg;background:${bg};opacity:${m ? 1 : .45}"></div>`;
-    }).join('') + `<div class="date"><small>Opens</small><b>${S.weeks ? 'Tonight' : `${reveal.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} · ${reveal.getFullYear()}`}</b></div>`;
+    }).join('') + `<div class="date"><b>${S.weeks ? 'Tonight' : `${reveal.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} · ${reveal.getFullYear()}`}</b></div>`;
     const n = S.moments.length;
     $('#sealedCount').textContent = `${n} moment${n === 1 ? '' : 's'} sealed`;
     $('#openNow').disabled = S.moments.filter((m) => m.by === S.me).length < 1;
@@ -1142,9 +1140,9 @@ body:not(.ready) .cue { opacity: 0 !important; }
   function land() { mode = 'land'; modeT = 0; last = winner; tick(1600); buzz([10, 40, 20]); blobs.forEach((b) => { b.vx *= .3; b.vy *= .3; }); }
   function showResult() {
     shown = true; const k = KINDS[winner];
-    $('#rTitle').textContent = k.title; $('#rIcon').innerHTML = `<svg viewBox="0 0 24 24">${k.icon}</svg>`;
-    $('#rLine').textContent = SCENES[S.scene] ? SCENES[S.scene].ask : k.lines[Math.floor(Math.random() * 3)];
-    $('#rReroll').outerHTML = rerolls > 0 && !SCENES[S.scene] ? `<button class="reroll" id="rReroll">↻ Reroll · 1 free</button>` : `<span class="reroll it serif" id="rReroll" style="color:var(--muted)">Fate has spoken.</span>`;
+    $('#rTitle').textContent = ({ photo: 'A photo!', video: 'A video!', voice: 'A voice note!', doodle: 'Ooh, a doodle.', word: 'Words.' })[winner]; $('#rIcon').innerHTML = `<svg viewBox="0 0 24 24">${k.icon}</svg>`;
+    $('#rLine').textContent = SCENES[S.scene] ? SCENES[S.scene].ask : k.lines[0];
+    $('#rReroll').outerHTML = rerolls > 0 && !SCENES[S.scene] ? `<button class="reroll" id="rReroll">↻ 1 free reroll</button>` : `<span class="reroll it serif" id="rReroll" style="color:var(--muted)">Fate has spoken.</span>`;
     const rr = $('#rReroll'); if (rr.tagName === 'BUTTON') rr.addEventListener('click', () => { rerolls--; startSpin(); });
     $('#shufSpin').classList.add('off'); $('#result').classList.remove('off'); chime();
   }
@@ -1193,7 +1191,7 @@ body:not(.ready) .cue { opacity: 0 !important; }
   let draft = null;
   function openCapture(kind) {
     const k = KINDS[kind]; draft = { kind };
-    $('#capDot').style.background = k.color; $('#capKind').textContent = k.title; $('#capAsk').textContent = SCENES[S.scene] && SCENES[S.scene].kind === kind ? SCENES[S.scene].ask : k.ask;
+    $('#capDot').style.background = k.color; $('#capKind').textContent = k.title; $('#capAsk').textContent = SCENES[S.scene] && SCENES[S.scene].kind === kind ? SCENES[S.scene].ask : k.title;
     const body = $('#capBody'); $('#sealGo').disabled = true;
     if (kind === 'doodle') {
       body.innerHTML = `<canvas class="doodle" id="pad" width="600" height="600"></canvas><p class="note" style="margin-top:8px">No erasing. Every line stays.</p>`;
@@ -1477,7 +1475,7 @@ body:not(.ready) .cue { opacity: 0 !important; }
     $('#tvSample').hidden = false; step(4);
     tv.focus({ preventScroll: true });
   }
-  $('#tvSample').addEventListener('click', () => { R = sample(); renderTV(); $('#tvSample').hidden = true; $('#revealIntro').textContent = 'A sample reveal night, "Senior spring". Click the TV or press → to keep going.'; if (S.view === 'companion') { renderHome(); show('home'); } });
+  $('#tvSample').addEventListener('click', () => { R = sample(); renderTV(); $('#tvSample').hidden = true; $('#revealIntro').textContent = 'A sample reveal night, "Senior spring".'; if (S.view === 'companion') { renderHome(); show('home'); } });
 
   addEventListener('resize', measure);
 })();
