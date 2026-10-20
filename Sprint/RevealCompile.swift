@@ -163,6 +163,17 @@ nonisolated enum RevealCompiler {
         return "\(md(from)) · \(y(from)) – \(md(to)) · \(y(to))"
     }
 
+    /// Title card: always start to end, so the room sees how long it ran.
+    /// Same day: "Oct 18 · 9:02 am – 8:40 pm". Same year: "Oct 12 – Oct 18 · 2026". Across years: "Oct 18 · 2026 – Oct 18 · 2027".
+    static func span(_ from: Date, _ to: Date) -> String {
+        let cal = Calendar.current
+        let md: (Date) -> String = { $0.formatted(.dateTime.month(.abbreviated).day()) }
+        let y: (Date) -> String = { $0.formatted(.dateTime.year()) }
+        if cal.isDate(from, inSameDayAs: to) { return "\(md(from)) · \(time(from)) – \(time(to))" }
+        if cal.component(.year, from: from) == cal.component(.year, from: to) { return "\(md(from)) – \(md(to)) · \(y(from))" }
+        return "\(md(from)) · \(y(from)) – \(md(to)) · \(y(to))"
+    }
+
     /// "Saturday night". Late night counts toward the evening before.
     static func section(_ date: Date) -> String {
         let hour = Calendar.current.component(.hour, from: date)

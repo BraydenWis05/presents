@@ -25,6 +25,27 @@ final class NightRoom: NSObject, MCSessionDelegate, MCNearbyServiceAdvertiserDel
         case whereAreWe
         /// Host heartbeat every 2 s: keeps late or flaky phones on the right step.
         case beat(step: Int, paused: Bool, hidden: [UUID])
+        case react(Reaction)     // no sender, ever
+    }
+
+    /// What a friend can send up to the TV. Anonymous, never counted, never saved.
+    nonisolated enum Reaction: String, Codable, CaseIterable, Sendable {
+        case laugh, cry, heart, gasp
+
+        var label: String {
+            switch self {
+            case .laugh: "Laughing"
+            case .cry: "Crying"
+            case .heart: "Love"
+            case .gasp: "Gasp"
+            }
+        }
+    }
+
+    struct Floating: Identifiable {
+        let id = UUID()
+        var reaction: Reaction
+        var x: Double
     }
 
     enum Role { case idle, host, guest }
@@ -43,6 +64,8 @@ final class NightRoom: NSObject, MCSessionDelegate, MCNearbyServiceAdvertiserDel
 
     // Host side
     var inRoom: [String] = []
+    /// Reactions floating up the TV right now. They fade on their own.
+    var floating: [Floating] = []
     @ObservationIgnored var onHide: ((UUID) -> Void)?
     @ObservationIgnored private var pausedBy: MCPeerID?
 
@@ -133,6 +156,21 @@ final class NightRoom: NSObject, MCSessionDelegate, MCNearbyServiceAdvertiserDel
         }
     }
 
+    /// Send a reaction to the TV. Not queued: a late reaction means nothing.
+    func react(_ reaction: Reaction) {
+        if role == .host { float(reaction) } else { send(.react(reaction)) }
+    }
+
+    private func float(_ reaction: Reaction) {
+        let f = Floating(reaction: reaction, x: .random(in: 0.12...0.88))
+        floating.append(f)
+        if floating.count > 24 { floating.removeFirst(floating.count - 24) }
+        Task { [weak self] in
+            try? await Task.sleep(for: .seconds(3.4))
+            self?.floating.removeAll { $0.id == f.id }
+        }
+    }
+
     func hide(_ id: UUID) {
         hidden.insert(id)
         sendOrQueue(.hide(id))
@@ -195,6 +233,7 @@ final class NightRoom: NSObject, MCSessionDelegate, MCNearbyServiceAdvertiserDel
         iPaused = false
         hidden = []
         inRoom = []
+        floating = []
     }
 
     // MARK: Internals
@@ -298,6 +337,8 @@ final class NightRoom: NSObject, MCSessionDelegate, MCNearbyServiceAdvertiserDel
             case (.pause(let on), .guest):
                 self.paused = on
                 if !on { self.iPaused = false }
+            case (.react(let reaction), .host):
+                self.float(reaction)
             case (.whereAreWe, .host):
                 self.send(.step(self.step), to: [peerID])
             default:
