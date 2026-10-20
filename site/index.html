@@ -891,7 +891,7 @@ body:not(.ready) .cue { opacity: 0 !important; }
     $$('.view', screen).forEach((el) => el.classList.toggle('on', el.dataset.v === v));
     blobsVisible(v === 'shuffle');
   }
-  const HINTS = ['Type your name to start.', "Maya and Jordan are here. Drag their phones close to yours to connect.", 'Tap the white dots and shuffle.', 'Add what you got. Do it a couple of times. Friends add things too.', 'Put it on the TV. Tap Next on your phone to go section by section.'];
+  const HINTS = ['Type your name to start.', "Maya and Jordan are here. Drag their phones close to yours to connect.", 'Tap the white dots and shuffle.', 'Add what you got. Do it a couple of times. Friends add things too.', 'Put it on the TV and watch it play.'];
   function step(i) { $('#hint').textContent = HINTS[i] || ''; }
   // the phone keeps its real 360×760 size, scaled to fit the screen
   function fit() {
@@ -1348,7 +1348,14 @@ body:not(.ready) .cue { opacity: 0 !important; }
       $('#compAgain').hidden = !last;
     }
     $('#tvProg').innerHTML = R.steps.map((_, i) => `<i class="${i <= R.i ? 'on' : ''}"></i>`).join('');
-    $('#tvHint').textContent = R.i === R.steps.length - 1 ? 'that\'s everything' : 'click to keep going';
+    $('#tvHint').textContent = '';
+    // Reveal night plays through on its own: each step holds long enough to take in, then moves on.
+    clearTimeout(window.__revealAuto);
+    if (R.auto && R.i < R.steps.length - 1) {
+      const n = st.type === 'open' ? R.sections[st.si].items.length : 0;
+      const hold = { title: 4200, section: 3400, open: 3600 + Math.min(n, 6) * 450, moment: 4000 }[st.type] || 4000;
+      window.__revealAuto = setTimeout(() => go(1), hold);
+    }
   }
   const EMOJI = ['😭', '😂', '🥹', '❤️', '💀', '🔥'];
   const SAYS = { title: ['ok here we go', 'I forgot what I even put in'], section: ['wait I remember this', 'oh no', 'that night 😭'], moment: ['no way', 'who took this', 'I love this', 'stop 😂', 'play it again'], end: ['again next semester?', 'ok that was perfect'] };
@@ -1444,8 +1451,8 @@ body:not(.ready) .cue { opacity: 0 !important; }
     ], { duration: 950, easing: 'cubic-bezier(.5,0,.2,1)' }).onfinish = () => g.remove();
     chime(); buzz([20, 60, 20]);
     show('companion');
-    setTimeout(() => { R = buildReveal(S.group || 'Our chapter', S.moments); renderTV(); }, 650);
-    $('#revealIntro').textContent = `Your chapter, "${S.group}". Tap Next on the phone or click the TV.`;
+    setTimeout(() => { R = buildReveal(S.group || 'Our chapter', S.moments); R.auto = true; renderTV(); }, 650);
+    $('#revealIntro').textContent = `Your chapter, "${S.group}". It plays on its own.`;
     $('#tvSample').hidden = false; step(4);
     tv.focus({ preventScroll: true });
   }
