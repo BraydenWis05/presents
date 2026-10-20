@@ -620,8 +620,8 @@ body:not(.ready) .cue { opacity: 0 !important; }
 .roll .cast .av { width: 9cqh; height: 9cqh; font-size: 4.5cqh; }
 .roll .cast span, .roll p { font-family: var(--serif); font-size: 5cqh; margin: 0; }
 .cside .cpic { position: absolute; top: 105%; width: 16cqh; height: 12cqh; border-radius: 1cqh; overflow: hidden; opacity: .75; }
-.roll-on .cside .cpic { animation: rise 9s linear forwards; }
-@keyframes rise { to { top: -20%; } }
+.roll-on .cside .cpic { animation: cpicRise 9s linear forwards; }
+@keyframes cpicRise { to { top: -20%; } }
 .cend { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 2cqh; text-align: center; opacity: 0; transition: opacity 1.2s; }
 .credits.done .cend { opacity: 1; } .credits.done .roll, .credits.done .cside { opacity: 0; transition: opacity .8s; }
 .cend b { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 9cqh; }
