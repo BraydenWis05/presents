@@ -577,6 +577,35 @@ body:not(.ready) .cue { opacity: 0 !important; }
 .finale b { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 11cqh; line-height: 1; text-shadow: 0 0 40px rgba(0,0,0,.8); }
 .finale small { font-size: 2.8cqh; color: rgba(255,255,255,.75); }
 .finale .faces .av { width: 6cqh; height: 6cqh; font-size: 3cqh; }
+/* Finley's reveal night: title card */
+.tshape { position: absolute; inset: 0; filter: blur(5cqh); opacity: 0; transition: opacity 1.4s ease 1.2s; }
+.tshape i { position: absolute; width: 22cqh; height: 17cqh; border-radius: 3cqh; translate: -50% -50%; opacity: .8; }
+.gather .tshape { opacity: .9; }
+.rfaces { position: absolute; left: 50%; top: 32%; }
+.rface { position: absolute; translate: calc(-50% + var(--rx)) calc(-50% + var(--ry)); transition: translate 1s cubic-bezier(.3,1.5,.5,1); }
+.rface .av { width: 7cqh; height: 7cqh; font-size: 3.5cqh; box-shadow: 0 0 0 .4cqh rgba(10,18,21,.8); }
+.gather .rface { translate: calc(-50% + var(--cx)) -50%; }
+.tc2 { top: 14%; } .tc2 small { opacity: 0; transition: opacity .9s ease 1.6s; } .gather .tc2 small { opacity: 1; }
+.tc2 .tspan { font-family: var(--serif); font-size: 3.6cqh; color: rgba(255,255,255,.85); }
+/* Finley's reveal night: wrap + credits */
+.wall.clump .wtile { translate: -50% -50% !important; left: 50% !important; top: 50% !important; scale: .5; opacity: 0; transition: left 1s cubic-bezier(.6,0,.3,1), top 1s cubic-bezier(.6,0,.3,1), scale 1s, opacity .6s .6s; transition-delay: 0s !important; }
+.credits { position: absolute; inset: 0; overflow: hidden; opacity: 0; transition: opacity .8s; }
+.credits.roll-on { opacity: 1; }
+.roll { position: absolute; left: 0; right: 0; top: 100%; display: grid; justify-items: center; gap: 2.4cqh; text-align: center; }
+.roll-on .roll { animation: credits 11s linear forwards; }
+@keyframes credits { to { transform: translateY(calc(-100% - 110cqh)); } }
+.roll small { font-size: 2.4cqh; letter-spacing: .3em; text-transform: uppercase; color: rgba(255,255,255,.55); margin-top: 3cqh; }
+.roll .cast { display: grid; justify-items: center; gap: 1cqh; }
+.roll .cast .av { width: 9cqh; height: 9cqh; font-size: 4.5cqh; }
+.roll .cast span, .roll p { font-family: var(--serif); font-size: 5cqh; margin: 0; }
+.cside .cpic { position: absolute; top: 105%; width: 16cqh; height: 12cqh; border-radius: 1cqh; overflow: hidden; opacity: .75; }
+.roll-on .cside .cpic { animation: rise 9s linear forwards; }
+@keyframes rise { to { top: -20%; } }
+.cend { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 2cqh; text-align: center; opacity: 0; transition: opacity 1.2s; }
+.credits.done .cend { opacity: 1; } .credits.done .roll, .credits.done .cside { opacity: 0; transition: opacity .8s; }
+.cend b { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 9cqh; }
+.cend small { font-size: 2.8cqh; color: rgba(255,255,255,.7); }
+.cend .faces .av { width: 6cqh; height: 6cqh; font-size: 3cqh; }
 </style>
 
 <div class="grain"></div>
@@ -808,7 +837,7 @@ body:not(.ready) .cue { opacity: 0 !important; }
     video: { title: 'Video', color: '#E2642E', ask: 'Film a few seconds of it.', lines: ["Show us what's in front of you", 'Ten seconds, no edits', 'Pan slowly across the room'], icon: '<rect x="2.5" y="6.5" width="13" height="11" rx="2"/><path d="M15.5 10.5 21.5 7v10l-6-3.5"/>' },
     voice: { title: 'Voice note', color: '#1A86A6', ask: 'Say it out loud.', lines: ['Say the thing out loud', 'Hum the song stuck in your head', 'Tell someone about your morning'], icon: '<path d="M3 10.4v3.2M6.6 7v10M10.2 4v16M13.8 8.7v6.6M17.4 6.2v11.6M21 10.4v3.2"/>' },
     doodle: { title: 'Doodle', color: '#BCD3DC', ask: 'Draw it. Badly is fine.', lines: ['Draw it badly, on purpose', 'Sketch the view from where you are', 'Doodle what you had for lunch'], icon: '<path d="M4 20l1.2-4.2L16.6 4.4a2 2 0 0 1 2.9 0l.1.1a2 2 0 0 1 0 2.9L8.2 18.8 4 20Z"/><path d="m14.5 6.5 3 3"/>' },
-    word: { title: 'Typed words', color: '#E5D24A', ask: 'Say it in a few words.', lines: ["Write the one line you'd forget", 'Something you overheard today', "What you'd tell yourself a year ago"], icon: '<path d="M4 7h16M4 12h16M10 17h10"/>' },
+    word: { title: 'Words', color: '#E5D24A', ask: 'Say it in a few words.', lines: ["Write the one line you'd forget", 'Something you overheard today', "What you'd tell yourself a year ago"], icon: '<path d="M4 7h16M4 12h16M10 17h10"/>' },
   };
   const ORDER = ['video', 'photo', 'word', 'voice', 'doodle'];
   const PEOPLE = { Maya: '#D257B4', Jordan: '#E2642E' };
@@ -1215,8 +1244,8 @@ body:not(.ready) .cue { opacity: 0 !important; }
     steps.push({ type: 'end' });
     return { title, sections, steps, i: 0, members: [...new Set(sorted.map((m) => m.by))] };
   }
-  const dayPart = (t) => { const d = new Date(t), h = d.getHours(); const day = new Date(h < 4 ? t - 6 * 3600e3 : t).toLocaleDateString('en-US', { weekday: 'long' }); return `${day} ${h >= 4 && h < 12 ? 'Morning' : h < 17 && h >= 12 ? 'Afternoon' : h < 21 && h >= 17 ? 'Evening' : 'Night'}`; };
-  const stamp = (t) => { const d = new Date(t); return `${d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()} ${d.getHours() % 12 || 12}:${String(d.getMinutes()).padStart(2, '0')}`; };
+  const dayPart = (t) => { const d = new Date(t), h = d.getHours(); const day = new Date(h < 4 ? t - 6 * 3600e3 : t).toLocaleDateString('en-US', { weekday: 'long' }); return `${day} ${h >= 4 && h < 12 ? 'morning' : h < 17 && h >= 12 ? 'afternoon' : h < 21 && h >= 17 ? 'evening' : 'night'}`; };
+  const stamp = (t) => { const d = new Date(t); return `${d.toLocaleDateString('en-US', { weekday: 'short' })} ${d.getHours() % 12 || 12}:${String(d.getMinutes()).padStart(2, '0')}`; };
   function mediaHTML(m, big) {
     const k = KINDS[m.kind];
     if (m.kind === 'word') return `<div style="position:absolute;inset:0;background:${k.color}"></div><div class="sgrain" style="position:absolute;inset:0;background-image:var(--grain);background-size:256px;mix-blend-mode:soft-light;opacity:.9"></div><div class="wordcard" style="${big ? '' : 'font-size:2.4cqh;padding:6%'}">${m.text || ''}</div>`;
@@ -1232,7 +1261,15 @@ body:not(.ready) .cue { opacity: 0 !important; }
     const st = R.steps[R.i], sc = document.createElement('div'); sc.className = 'scene hide';
     if (st.type === 'title') {
       const counts = Object.entries(R.sections.flatMap((s) => s.items).reduce((a, m) => (a[m.kind] = (a[m.kind] || 0) + 1, a), {})).map(([k, n]) => `${n} ${KINDS[k].title.toLowerCase()}${n > 1 && k !== 'word' ? 's' : ''}`).join(' · ');
-      sc.innerHTML = `<div class="title-c"><b>${R.title}</b><small>${counts}</small><div class="faces">${R.members.map((n) => av(n)).join('')}</div></div>`;
+      const all = R.sections.flatMap((x) => x.items), a0 = all[0].at, a1 = all[all.length - 1].at;
+      const md = (t) => new Date(t).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), yr = (t) => new Date(t).getFullYear();
+      const hm = (t) => new Date(t).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }).toLowerCase();
+      const span = new Date(a0).toDateString() === new Date(a1).toDateString() ? `${md(a0)} · ${hm(a0)} – ${hm(a1)}` : yr(a0) === yr(a1) ? `${md(a0)} – ${md(a1)} · ${yr(a0)}` : `${md(a0)} · ${yr(a0)} – ${md(a1)} · ${yr(a1)}`;
+      const n = R.members.length;
+      const shape = all.slice(0, 5).map((m, k) => `<i style="background:${KINDS[m.kind].color};left:${[38, 50, 56, 44, 47][k]}%;top:${[40, 36, 52, 56, 46][k]}%"></i>`).join('');
+      const faces = R.members.map((x, k) => { const a = -Math.PI / 2 + k * 2 * Math.PI / n; return `<span class="rface" style="--rx:${Math.cos(a) * 30}cqh;--ry:${Math.sin(a) * 30}cqh;--cx:${(k - (n - 1) / 2) * 5.6}cqh;transition-delay:${.5 + k * .08}s">${av(x)}</span>`; }).join('');
+      sc.innerHTML = `<div class="tshape">${shape}</div><div class="rfaces">${faces}</div><div class="title-c tc2"><b>${R.title}</b><small class="tspan">${span}</small><small>${counts}</small></div>`;
+      requestAnimationFrame(() => requestAnimationFrame(() => sc.classList.add('gather')));
     } else if (st.type === 'section') {
       const s = R.sections[st.si];
       sc.innerHTML = s.items.slice(0, 9).map((m, i) => { const [x, y, w, h] = SPOTS[i]; return `<div class="tframe" style="left:${x}%;top:${y}%;width:${w}%;height:${h}%">${mediaHTML(m, false)}</div>`; }).join('')
@@ -1250,7 +1287,7 @@ body:not(.ready) .cue { opacity: 0 !important; }
       }[n];
       const card = (m, k) => {
         const [x, y, w, r] = LAY[k], kind = m.kind;
-        const cap = `<span class="kcap">${stamp(m.at)} · ${m.by}</span>`;
+        const cap = `<span class="kcap">${stamp(m.at)}</span>`;
         let inner;
         if (kind === 'word') inner = `<div class="kp sticky"><div class="sgrain2"></div><p>${m.text || ''}</p>${cap}</div>`;
         else if (kind === 'voice') inner = `<div class="kp vcard"><div class="bars">${Array.from({ length: 16 }, (_, i) => `<i style="animation-delay:${(i * 37 % 100) / 100}s"></i>`).join('')}</div>${cap}</div>`;
@@ -1262,7 +1299,7 @@ body:not(.ready) .cue { opacity: 0 !important; }
       const v = items.find((m) => m.kind === 'voice' && m.src); if (v) {  }
     } else if (st.type === 'moment') {
       const m = R.sections[st.si].items[st.ii];
-      sc.innerHTML = `<div class="moment"><div class="media">${mediaHTML(m, true)}</div><div class="label"><span>${stamp(m.at)}</span><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6"><path d="M1.5 12S5.5 4.5 12 4.5 22.5 12 22.5 12 18.5 19.5 12 19.5 1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3.2"/></svg>${m.by}</span></div></div>`;
+      sc.innerHTML = `<div class="moment"><div class="media">${mediaHTML(m, true)}</div><div class="label"><span>${stamp(m.at)}</span></div></div>`;
       setTimeout(() => sc.querySelector('.moment')?.classList.add('sharp'), 300);
       if (m.kind === 'voice' && m.src) {  }
     } else {
@@ -1275,9 +1312,18 @@ body:not(.ready) .cue { opacity: 0 !important; }
         return `<div class="wtile" style="left:${(c + .5) / cols * 100}%;top:${(r + .5) / rows * 100}%;width:${92 / cols}%;height:${88 / rows}%;--sx:${sx}cqw;--sy:${sy}cqh;--rot:${rot}deg;--r:${(Math.random() - .5) * 6}deg;transition-delay:${.05 + k * .07}s">${mediaHTML(m, false)}</div>`;
       }).join('');
       const span = `${R.sections.length} moment${R.sections.length === 1 ? '' : 's'} together · ${n} things saved`;
-      sc.innerHTML = `<div class="wall">${tiles}</div><div class="finale"><b>That's the chapter.</b><small>${R.title} · ${span}</small><div class="faces">${R.members.map((x) => av(x)).join('')}</div></div>`;
+      const kinds = Object.entries(all.reduce((acc, m) => (acc[m.kind] = (acc[m.kind] || 0) + 1, acc), {})).map(([k, c]) => `<p>${c} ${KINDS[k].title.toLowerCase()}${c > 1 && k !== 'word' ? 's' : ''}</p>`).join('');
+      const pics = all.filter((m) => m.kind !== 'word' && m.kind !== 'voice');
+      const side = (left) => pics.map((m, k) => `<div class="cpic" style="${left ? 'left' : 'right'}:${4 + (k % 2) * 7}%;animation-delay:${(left ? 0 : 1.6) + k * 2.4}s">${mediaHTML(m, false)}</div>`).join('');
+      const first = all[0].at, last = all[n - 1].at, d = (t) => new Date(t).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      sc.innerHTML = `<div class="wall">${tiles}</div>
+        <div class="credits"><div class="cside">${side(true)}${side(false)}</div>
+          <div class="roll"><small>starring</small>${R.members.map((x) => `<div class="cast">${av(x)}<span>${x}</span></div>`).join('')}<small>with</small>${kinds}</div>
+          <div class="cend"><div class="faces">${R.members.map((x) => av(x)).join('')}</div><b>Ready for the next chapter.</b><small>${n} moments · ${d(first)}${d(first) === d(last) ? '' : ` – ${d(last)}`}</small></div></div>`;
       requestAnimationFrame(() => requestAnimationFrame(() => sc.querySelector('.wall')?.classList.add('in')));
-      setTimeout(() => { sc.querySelector('.wall')?.classList.add('settle'); sc.querySelector('.finale')?.classList.add('in'); chime(); }, 1400 + n * 70);
+      setTimeout(() => { sc.querySelector('.wall')?.classList.add('clump'); }, 1400 + n * 70);
+      setTimeout(() => { sc.querySelector('.credits')?.classList.add('roll-on'); }, 2400 + n * 70);
+      setTimeout(() => { sc.querySelector('.credits')?.classList.add('done'); }, 2400 + n * 70 + 11000);
     }
     tv.appendChild(sc); requestAnimationFrame(() => sc.classList.remove('hide'));
     if (S.view === 'companion') {
@@ -1287,7 +1333,7 @@ body:not(.ready) .cue { opacity: 0 !important; }
       comp.appendChild(mc); requestAnimationFrame(() => mc.classList.remove('hide'));
       if (st.type === 'moment') setTimeout(() => mc.querySelector('.moment')?.classList.add('sharp'), 300);
       const m = st.type === 'moment' ? R.sections[st.si].items[st.ii] : null;
-      $('#compTitle').textContent = st.type === 'title' ? R.title : st.type === 'section' ? dayPart(R.sections[st.si].start) : st.type === 'open' ? `${dayPart(R.sections[st.si].start)}, together` : st.type === 'moment' ? `${m.by}'s ${KINDS[m.kind].title.toLowerCase()}` : "That's the chapter.";
+      $('#compTitle').textContent = st.type === 'title' ? R.title : st.type === 'section' ? dayPart(R.sections[st.si].start) : st.type === 'open' ? `${dayPart(R.sections[st.si].start)}, together` : st.type === 'moment' ? KINDS[m.kind].title : "That's the chapter.";
       $('#compSub').textContent = `${R.i + 1} of ${R.steps.length}`;
       $('#room').innerHTML = S.members.map((n) => av(n)).join('') + `<span>everyone's here</span>`;
       react(st, m);
