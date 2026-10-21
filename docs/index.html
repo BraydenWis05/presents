@@ -1436,7 +1436,8 @@ body:not(.ready) .cue { opacity: 0 !important; }
     beats.forEach((b, k) => setTimeout(() => { beats.forEach((x) => x.classList.remove('on')); b.classList.add('on'); }, 900 + k * 3600));
   }
   $('#replay').addEventListener('click', () => { location.hash = 'again'; location.reload(); });
-  if (location.hash === '#again') { history.replaceState(null, '', location.pathname + location.search); endIntro(); requestAnimationFrame(() => $('#demo').scrollIntoView({ behavior: 'instant' })); }
+  // bepresents.org/demo (and #again) skip the opening and land right on the demo.
+  if (location.hash === '#again' || location.hash === '#demo' || new URLSearchParams(location.search).has('demo')) { history.replaceState(null, '', '/'); endIntro(); requestAnimationFrame(() => $('#demo').scrollIntoView({ behavior: 'instant' })); }
   const NOTE_TO = ''; // where notes go
   $('#note').addEventListener('submit', (ev) => {
     ev.preventDefault();
