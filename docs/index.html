@@ -627,6 +627,8 @@ body:not(.ready) .cue { opacity: 0 !important; }
 .cend b { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 9cqh; }
 .cend small { font-size: 2.8cqh; color: rgba(255,255,255,.7); }
 .cend .faces .av { width: 6cqh; height: 6cqh; font-size: 3cqh; }
+.cend .tv-again { margin-top: 1.5cqh; font-size: 2.6cqh; padding: 1.4cqh 3cqh; pointer-events: auto; }
+.credits:not(.done) .tv-again { pointer-events: none; }
 </style>
 
 <div class="grain"></div>
@@ -1338,7 +1340,7 @@ body:not(.ready) .cue { opacity: 0 !important; }
       sc.innerHTML = `<div class="wall">${tiles}</div>
         <div class="credits"><div class="cside">${side(true)}${side(false)}</div>
           <div class="roll"><small>starring</small>${R.members.map((x) => `<div class="cast">${av(x)}<span>${x}</span></div>`).join('')}<small>with</small>${kinds}</div>
-          <div class="cend"><div class="faces">${R.members.map((x) => av(x)).join('')}</div><b>Ready for the next chapter.</b><small>${n} moments · ${d(first)}${d(first) === d(last) ? '' : ` – ${d(last)}`}</small></div></div>`;
+          <div class="cend"><div class="faces">${R.members.map((x) => av(x)).join('')}</div><b>Ready for the next chapter.</b><small>${n} moments · ${d(first)}${d(first) === d(last) ? '' : ` – ${d(last)}`}</small><button class="pill tv-again">Go through it again</button></div></div>`;
       requestAnimationFrame(() => requestAnimationFrame(() => sc.querySelector('.wall')?.classList.add('in')));
       setTimeout(() => { sc.querySelector('.wall')?.classList.add('clump'); }, 1400 + n * 70);
       setTimeout(() => { sc.querySelector('.credits')?.classList.add('roll-on'); }, 2400 + n * 70);
@@ -1428,6 +1430,8 @@ body:not(.ready) .cue { opacity: 0 !important; }
 
   $('#compNext').addEventListener('click', () => go(1));
   $('#compAgain').addEventListener('click', () => { location.hash = 'again'; location.reload(); });
+  // The TV's end card offers another go too.
+  document.addEventListener('click', (e) => { if (e.target.closest('.tv-again')) { e.stopPropagation(); location.hash = 'again'; location.reload(); } }, true);
   // ---------- the ending ----------
   const TEAM = [{ name: 'Brayden', img: 'team1.png', url: 'https://www.linkedin.com/in/braydenwisniewski/' }, { name: 'Chris', img: 'team2.png', url: 'https://www.linkedin.com/in/chris-demassa/' }, { name: 'Finley', img: 'team3.png', url: 'https://www.linkedin.com/in/finley-peplinski/' }];
   $('#faces3').innerHTML = TEAM.map((t) => `<a class="tm" href="${t.url}" target="_blank" rel="noopener" aria-label="${t.name} on LinkedIn"><figure><div class="ph" style="${t.img ? `background-image:url(${t.img})` : ''}">${t.img ? '' : '·'}</div><figcaption>${t.name}</figcaption></figure></a>`).join('');
